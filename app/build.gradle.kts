@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
 }
 
@@ -11,6 +12,10 @@ android {
             minorApiLevel = 1
         }
     }
+    androidResources {
+        generateLocaleConfig = true
+        localeFilters += setOf("en", "ru")
+    }
 
     defaultConfig {
         applicationId = "com.nikol.cuhub"
@@ -18,7 +23,7 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
-
+        manifestPlaceholders["YANDEX_CLIENT_ID"] = "3559bde3ceea428d83f8bc46f8e71681"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -64,11 +69,23 @@ dependencies {
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.okHttp)
 
+    implementation(libs.kotlinx.serialization.json)
+
     implementation(libs.datastore.preferences)
 
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
+    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
+    implementation(libs.androidx.core.splashscreen)
+    implementation(libs.androidx.appcompat)
 
     implementation(projects.core.network)
     implementation(projects.core.di)
     implementation(projects.core.storage)
     implementation(projects.core.security)
+    implementation(projects.core.lms)
+    implementation(projects.core.prefs)
+
+    implementation(projects.feature.auth.authApi)
+    implementation(projects.feature.auth.authImpl)
 }

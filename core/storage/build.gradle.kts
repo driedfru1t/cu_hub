@@ -18,8 +18,8 @@ android {
         consumerProguardFiles("consumer-rules.pro")
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
 }
@@ -27,5 +27,10 @@ android {
 dependencies {
     implementation(libs.dagger)
     ksp(libs.dagger.compiler)
-    implementation(libs.datastore.preferences)
+
+    implementation(projects.core.lms)
+
+    implementation(libs.room)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
 }

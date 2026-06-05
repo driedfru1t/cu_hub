@@ -1,0 +1,9 @@
+<resources>
+    <style name="Theme.CUHub.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <item name="postSplashScreenTheme">@style/Theme.CUHub</item>
+
+        <!-- <item name="android:windowSplashScreenBrandingImage">@drawable/ic_launcher_background</item> -->
+    </style>
+</resources>

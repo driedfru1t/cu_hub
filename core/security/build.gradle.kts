@@ -29,5 +29,5 @@ dependencies {
     ksp(libs.dagger.compiler)
     implementation(libs.datastore.preferences)
 
-    implementation(projects.core.storage)
+    implementation(projects.core.prefs)
 }

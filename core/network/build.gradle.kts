@@ -39,4 +39,6 @@ dependencies {
 
     implementation(libs.dagger)
     ksp(libs.dagger.compiler)
+
+    implementation(projects.core.security)
 }

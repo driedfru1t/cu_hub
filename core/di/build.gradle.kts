@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
 }
 
@@ -19,8 +20,8 @@ android {
         consumerProguardFiles("consumer-rules.pro")
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
         compose = true
@@ -40,7 +41,10 @@ dependencies {
     implementation(projects.core.network)
     implementation(projects.core.storage)
     implementation(projects.core.security)
+    implementation(projects.core.lms)
+    implementation(projects.core.prefs)
 
     implementation(libs.datastore.preferences)
+    implementation(libs.kotlinx.serialization.json)
 
 }

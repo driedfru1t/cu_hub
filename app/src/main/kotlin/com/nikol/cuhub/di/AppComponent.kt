@@ -1,6 +1,7 @@
 package com.nikol.cuhub.di
 
 import android.content.Context
+import com.nikol.di.dep.AppDep
 import com.nikol.di.dep.NetworkDep
 import com.nikol.di.dep.StorageDep
 import com.nikol.di.dep.TokenDep
@@ -11,7 +12,7 @@ import javax.inject.Singleton
 
 @Singleton
 @Component(modules = [MainModule::class])
-interface AppComponent : NetworkDep, StorageDep, TokenDep {
+interface AppComponent : AppDep {
 
     @Component.Factory
     interface Factory {
