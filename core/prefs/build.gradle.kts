@@ -1,31 +1,12 @@
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.ksp)
+    alias(libs.plugins.cuhub.android.library)
+    alias(libs.plugins.cuhub.dagger)
 }
 
 android {
     namespace = "com.nikol.prefs"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
-
-    defaultConfig {
-        minSdk = 26
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
 }
 
 dependencies {
-    implementation(libs.dagger)
-    ksp(libs.dagger.compiler)
     implementation(libs.datastore.preferences)
 }

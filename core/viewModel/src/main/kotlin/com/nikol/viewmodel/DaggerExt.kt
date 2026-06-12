@@ -2,14 +2,14 @@ package com.nikol.viewmodel
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 // эта штука нужна чтобы мы прокидывали свой ViewModelFactory где есть фабрики всех viewModel конкретно этого компонента
 val LocalViewModelFactory =
-    compositionLocalOf<ViewModelProvider.Factory> { error("не запровайжена фабрика") }
+    staticCompositionLocalOf<ViewModelProvider.Factory> { error("не запровайжена фабрика") }
 
 @Composable
 inline fun <reified VM : RouterViewModel<*, *, *, R>, reified R : Router> daggerViewModel(

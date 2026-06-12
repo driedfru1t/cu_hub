@@ -1,4 +1,5 @@
 pluginManagement {
+    includeBuild("build-logic")
     repositories {
         google {
             content {
@@ -38,3 +39,7 @@ include(":core:navigation")
 include(":core:lms")
 include(":core:cache")
 include(":core:prefs")
+include(":feature:lms:lms-impl")
+include(":feature:lms:lms-api")
+include(":core:ui")
+include(":core:designsystem")

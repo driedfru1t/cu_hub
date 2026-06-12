@@ -1,41 +1,18 @@
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.cuhub.android.library)
+    alias(libs.plugins.cuhub.android.library.compose)
+    alias(libs.plugins.cuhub.dagger)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.ksp)
 }
 
 android {
     namespace = "com.nikol.di"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
-
-    defaultConfig {
-        minSdk = 26
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-    buildFeatures {
-        compose = true
-    }
 }
 
 dependencies {
-    implementation(libs.dagger)
-    ksp(libs.dagger.compiler)
-
     implementation(platform(libs.ktor.bom))
     implementation(libs.ktor.client.core)
 
-    implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.runtime)
 
     implementation(projects.core.network)
@@ -46,5 +23,8 @@ dependencies {
 
     implementation(libs.datastore.preferences)
     implementation(libs.kotlinx.serialization.json)
+
+    implementation(libs.androidx.lifecycle.viewmodel)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
 
 }
