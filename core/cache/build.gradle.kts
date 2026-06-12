@@ -1,26 +1,9 @@
 plugins {
-    alias(libs.plugins.android.library)
+    alias(libs.plugins.cuhub.android.library)
 }
 
 android {
     namespace = "com.nikol.cache"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
-
-    defaultConfig {
-        minSdk = 26
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
 }
 
 dependencies {
@@ -29,6 +12,10 @@ dependencies {
 
     implementation(platform(libs.arrow.bom))
     implementation(libs.arrow.core)
+
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.junit)
+    testImplementation(libs.turbine)
 
     implementation(projects.core.network)
 }

@@ -8,9 +8,7 @@ plugins {
 android {
     namespace = "com.nikol.cuhub"
     compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
+        version = release(37)
     }
     androidResources {
         generateLocaleConfig = true
@@ -20,7 +18,7 @@ android {
     defaultConfig {
         applicationId = "com.nikol.cuhub"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
         manifestPlaceholders["YANDEX_CLIENT_ID"] = "3559bde3ceea428d83f8bc46f8e71681"
@@ -85,7 +83,10 @@ dependencies {
     implementation(projects.core.security)
     implementation(projects.core.lms)
     implementation(projects.core.prefs)
+    implementation(projects.core.designsystem)
 
     implementation(projects.feature.auth.authApi)
     implementation(projects.feature.auth.authImpl)
+    implementation(projects.feature.lms.lmsApi)
+    implementation(projects.feature.lms.lmsImpl)
 }
