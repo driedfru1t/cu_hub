@@ -47,8 +47,6 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() =
     }.apply {
         jvmTarget = JvmTarget.JVM_17
         allWarningsAsErrors = needWarnings
-        freeCompilerArgs.add(
-            "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
-        )
+        freeCompilerArgs.add("-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi")
     }
 }

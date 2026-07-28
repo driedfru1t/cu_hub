@@ -25,10 +25,15 @@ class Navigator(
     fun onBack() {
         val currentStack = state.backStacks[state.topLevelRoute]
             ?: error("Stack for ${state.topLevelRoute} not found")
+
         if (currentStack.size > 1) {
-            state.topLevelRoute = state.startRoute
-        } else {
             currentStack.removeLastOrNull()
+        } else {
+            if (state.topLevelRoute != state.startRoute) {
+                state.topLevelRoute = state.startRoute
+            } else {
+                currentStack.removeLastOrNull()
+            }
         }
     }
 }

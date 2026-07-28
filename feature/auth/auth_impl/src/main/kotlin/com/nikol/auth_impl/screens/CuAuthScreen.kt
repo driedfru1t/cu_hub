@@ -10,8 +10,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import com.nikol.auth_impl.mvi.intent.AuthIntent
-import com.nikol.auth_impl.viewModel.CuAuthRouter
-import com.nikol.auth_impl.viewModel.CuAuthViewModel
+import com.nikol.auth_impl.viewModel.AuthRouter
+import com.nikol.auth_impl.viewModel.AuthViewModel
 import com.nikol.security.CuToken
 import com.nikol.viewmodel.daggerViewModel
 
@@ -24,7 +24,7 @@ fun CuAuthScreen(
     val targetRedirectDomain = remember { "my.centraluniversity.ru" }
 
 
-    val vm = daggerViewModel<CuAuthViewModel, CuAuthRouter>(key = "cu") { CuAuthRouter { cuAuthSuccess() } }
+    val vm = daggerViewModel<AuthViewModel, AuthRouter>(key = "cu") { AuthRouter { cuAuthSuccess() } }
     AndroidView(
         modifier = Modifier.fillMaxSize(),
         factory = { context ->

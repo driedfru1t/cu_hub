@@ -1,6 +1,5 @@
 package com.nikol.viewmodel
 
-import android.view.View
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import dagger.MapKey
@@ -27,4 +26,8 @@ class DaggerViewModel @Inject constructor(
         @Suppress("UNCHECKED_CAST")
         return creator.get() as T
     }
+}
+
+interface FeatureComponent {
+    fun viewModelFactory(): ViewModelProvider.Factory
 }

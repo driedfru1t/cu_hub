@@ -18,8 +18,9 @@ dependencies {
     implementation(projects.core.network)
     implementation(projects.core.storage)
     implementation(projects.core.security)
-    implementation(projects.core.lms)
+    implementation(projects.core.lms.data)
     implementation(projects.core.prefs)
+    implementation(projects.core.common)
 
     implementation(libs.datastore.preferences)
     implementation(libs.kotlinx.serialization.json)

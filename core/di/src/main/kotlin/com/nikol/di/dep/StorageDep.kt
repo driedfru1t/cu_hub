@@ -2,7 +2,8 @@ package com.nikol.di.dep
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import com.nikol.lms.data.local.dao.CourseDao
+import com.nikol.lms.data.local.dao.CourseOverviewDao
+import com.nikol.lms.data.local.dao.CoursesDao
 import com.nikol.prefs.qualifers.TokenDataStore
 
 interface StorageDep : DataStoreTokenDep, LocalLmsDep
@@ -13,5 +14,7 @@ interface DataStoreTokenDep {
 }
 
 interface LocalLmsDep {
-    fun courseDao() : CourseDao
+    fun courseDao(): CoursesDao
+
+    fun courseOverviewDao(): CourseOverviewDao
 }

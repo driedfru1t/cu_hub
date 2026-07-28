@@ -1,9 +1,7 @@
 package com.nikol.auth_impl.di
 
-import androidx.lifecycle.ViewModelProvider
-import com.nikol.di.dep.LocalLmsDep
-import com.nikol.di.dep.NetworkCuDep
 import com.nikol.di.dep.TokenDep
+import com.nikol.viewmodel.FeatureComponent
 import dagger.Component
 
 @Component(
@@ -11,7 +9,7 @@ import dagger.Component
     modules = [AuthViewModelModule::class]
 )
 @AuthScope
-interface AuthComponent {
+interface AuthComponent : FeatureComponent {
 
     @Component.Factory
     interface Factory {
@@ -19,6 +17,4 @@ interface AuthComponent {
             tokenDep: TokenDep
         ): AuthComponent
     }
-
-    fun viewModelFactory(): ViewModelProvider.Factory
 }

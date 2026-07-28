@@ -1,16 +1,17 @@
 package com.nikol.lms_impl.di
 
-import androidx.lifecycle.ViewModelProvider
 import com.nikol.di.dep.LocalLmsDep
 import com.nikol.di.dep.NetworkCuDep
+import com.nikol.viewmodel.FeatureComponent
+import dagger.BindsInstance
 import dagger.Component
 
 @LmsScope
 @Component(
     dependencies = [NetworkCuDep::class, LocalLmsDep::class],
-    modules = [LmsViewModelModule::class, LmsDataModule::class, LmsUseCaseModule::class]
+    modules = [CoursesViewModelModule::class, LmsDataModule::class, LmsUseCaseModule::class, FactoryVMModule::class]
 )
-interface CoursesComponent {
+interface CoursesComponent : FeatureComponent {
 
     @Component.Factory
     interface Factory {
@@ -19,6 +20,21 @@ interface CoursesComponent {
             localLmsDep: LocalLmsDep
         ): CoursesComponent
     }
+}
 
-    fun viewModelProvider(): ViewModelProvider.Factory
+@LmsScope
+@Component(
+    dependencies = [NetworkCuDep::class, LocalLmsDep::class],
+    modules = [CourseDetailVMModule::class, LmsDataModule::class, LmsUseCaseModule::class, FactoryVMModule::class]
+)
+interface CourseComponent : FeatureComponent {
+
+    @Component.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance id: Int,
+            networkCuDep: NetworkCuDep,
+            localLmsDep: LocalLmsDep
+        ): CourseComponent
+    }
 }

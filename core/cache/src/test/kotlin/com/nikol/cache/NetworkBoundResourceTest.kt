@@ -35,9 +35,4 @@ class NetworkBoundResourceTest {
         }
         assertTrue("Данные должны быть сохраненны", isDataSave)
     }
-
-    @Test
-    fun `сбой запроса - однаём один раз кэш и потом просто возвращаем ошибку`(){
-
-    }
 }

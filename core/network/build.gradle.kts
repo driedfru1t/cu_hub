@@ -18,6 +18,8 @@ dependencies {
     implementation(libs.ktor.client.auth)
     implementation(libs.ktor.client.resources)
 
+    implementation(libs.coil.network.ktor3)
+
     implementation(platform(libs.arrow.bom))
     implementation(libs.arrow.core)
 

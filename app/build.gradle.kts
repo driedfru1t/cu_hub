@@ -1,3 +1,6 @@
+import java.util.Properties
+import kotlin.apply
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -14,14 +17,16 @@ android {
         generateLocaleConfig = true
         localeFilters += setOf("en", "ru")
     }
-
+    val properties = Properties().apply {
+        load(rootProject.file("local.properties").inputStream())
+    }
     defaultConfig {
         applicationId = "com.nikol.cuhub"
         minSdk = 26
         targetSdk = 37
         versionCode = 1
         versionName = "1.0"
-        manifestPlaceholders["YANDEX_CLIENT_ID"] = "3559bde3ceea428d83f8bc46f8e71681"
+        manifestPlaceholders["YANDEX_CLIENT_ID"] = properties.getProperty("YANDEX_CLIENT_ID")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -52,6 +57,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.material3)
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
@@ -76,14 +82,23 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.appcompat)
+    implementation(libs.coil.network.ktor3)
+    implementation(libs.coil.compose)
+
+    implementation(libs.work.runtime.ktx)
 
     implementation(projects.core.network)
     implementation(projects.core.di)
     implementation(projects.core.storage)
     implementation(projects.core.security)
-    implementation(projects.core.lms)
+    implementation(projects.core.lms.data)
+    implementation(projects.core.lms.domain)
+    implementation(projects.core.calendar.data)
+    implementation(projects.core.calendar.domain)
     implementation(projects.core.prefs)
     implementation(projects.core.designsystem)
+    implementation(projects.core.common)
+    implementation(projects.core.ui)
 
     implementation(projects.feature.auth.authApi)
     implementation(projects.feature.auth.authImpl)
