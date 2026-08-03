@@ -1,7 +1,6 @@
 package com.nikol.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -26,9 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -40,7 +38,7 @@ import com.nikol.lms.domain.model.CourseCategory
 import com.nikol.lms.domain.model.CourseSummary
 import com.nikol.lms.domain.model.PublicationState
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun CourseCard(
     courseSummary: CourseSummary,
@@ -50,87 +48,98 @@ fun CourseCard(
 ) {
     val isArchived = courseSummary.state == PublicationState.ARCHIVED || courseSummary.isArchived
 
-    val iconColor = remember(courseSummary.category) { courseSummary.category.toGoogleIconColor() }
+    // Возвращаем твои фиксированные цвета для визуальной ассоциации (как папки в Google Drive)
+    val baseColor = remember(courseSummary.category) { courseSummary.category.toGoogleIconColor() }
+    val iconBgColor = baseColor.copy(alpha = 0.15f) // Нежный фон в цвет категории
+    val iconTintColor = baseColor                   // Сочная иконка
+
     val categoryName = remember(courseSummary.category) {
         courseSummary.category.name.lowercase().replace('_', ' ')
             .replaceFirstChar { it.uppercase() }
     }
 
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .clickable { click() },
+        onClick = click,
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 0.dp
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         )
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(16.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .size(88.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(
-                        brush = Brush.linearGradient(
-                            colors = listOf(
-                                iconColor.copy(alpha = 0.2f),
-                                iconColor.copy(alpha = 0.05f)
-                            )
-                        )
-                    ),
-                contentAlignment = Alignment.Center
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.Top
             ) {
-                Icon(
-                    painter = painterResource(courseSummary.category.toIcon()),
-                    contentDescription = null,
-                    tint = iconColor,
-                    modifier = Modifier.size(36.dp)
-                )
+                // Иконка 48dp с мягким фоном твоего цвета
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(iconBgColor),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painterResource(courseSummary.category.toIcon()),
+                        contentDescription = null,
+                        tint = iconTintColor,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = categoryName,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = iconTintColor, // Твой цвет
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = courseSummary.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                IconButton(
+                    onClick = clickToMore,
+                    modifier = Modifier.padding(start = 4.dp).size(36.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.more_vert),
+                        contentDescription = "Ещё",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
+            val showDraft = courseSummary.state == PublicationState.DRAFT
+            val showSkill = courseSummary.settings.isSkillLevelEnabled
 
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = categoryName,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = iconColor,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = courseSummary.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    lineHeight = MaterialTheme.typography.titleMedium.lineHeight * 1.1f
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
+            if (showDraft || isArchived || showSkill) {
+                Spacer(modifier = Modifier.height(16.dp))
 
                 FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    if (courseSummary.state == PublicationState.DRAFT) {
+                    if (showDraft) {
                         StatusBadge(
                             text = "Черновик",
                             containerColor = MaterialTheme.colorScheme.errorContainer,
@@ -144,25 +153,14 @@ fun CourseCard(
                         )
                     }
 
-                    if (courseSummary.settings.isSkillLevelEnabled) {
+                    if (showSkill) {
                         StatusBadge(
                             text = courseSummary.settings.skillLevel.name,
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
-                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
-            }
-
-            IconButton(
-                onClick = clickToMore,
-                modifier = Modifier.align(Alignment.Top)
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.more_vert),
-                    contentDescription = "Ещё",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
             }
         }
     }
@@ -174,21 +172,19 @@ private fun StatusBadge(
     containerColor: Color,
     contentColor: Color
 ) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(6.dp))
-            .background(containerColor)
-            .padding(horizontal = 6.dp, vertical = 2.dp)
+    Surface(
+        shape = RoundedCornerShape(8.dp),
+        color = containerColor
     ) {
         Text(
             text = text.uppercase(),
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold,
-            color = contentColor
+            color = contentColor,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
         )
     }
 }
-
 
 private fun CourseCategory.toIcon(): Int {
     return when (this) {
@@ -207,6 +203,7 @@ private fun CourseCategory.toIcon(): Int {
     }
 }
 
+// Оставили твои цвета для визуальной ассоциации!
 private fun CourseCategory.toGoogleIconColor(): Color = when (this) {
     CourseCategory.WITHOUT_CATEGORY -> Color(0xFF757575)
     CourseCategory.GENERAL -> Color(0xFF00796B)
