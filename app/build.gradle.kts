@@ -104,4 +104,6 @@ dependencies {
     implementation(projects.feature.auth.authImpl)
     implementation(projects.feature.lms.lmsApi)
     implementation(projects.feature.lms.lmsImpl)
+    implementation(projects.feature.schedule.scheduleImpl)
+    implementation(projects.feature.schedule.scheduleApi)
 }

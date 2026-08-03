@@ -3,6 +3,9 @@ package com.nikol.calendar.data.local
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import androidx.room.TypeConverter
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import java.time.Instant
 
 @Entity(
@@ -34,7 +37,32 @@ data class CalendarEventEntity(
 
     // Список отменённых и переопределённых дат (EXDATE + RECURRENCE-ID)
     val exdates: List<Instant> = emptyList(),
+    val overrides: List<OverrideEventDto> = emptyList(),
 
     val rawIcs: String,
     val eTag: String
 )
+
+@Serializable
+data class OverrideEventDto(
+    val start: kotlin.time.Instant,
+    val end: kotlin.time.Instant,
+    val title: String? = null,
+    val description: String? = null
+)
+
+class JsonConverters {
+    private val json = Json { ignoreUnknownKeys = true }
+
+    @TypeConverter
+    fun fromOverrideList(value: List<OverrideEventDto>?): String {
+        if (value.isNullOrEmpty()) return "[]"
+        return json.encodeToString(value)
+    }
+
+    @TypeConverter
+    fun toOverrideList(value: String?): List<OverrideEventDto> {
+        if (value.isNullOrBlank() || value == "[]") return emptyList()
+        return runCatching { json.decodeFromString<List<OverrideEventDto>>(value) }.getOrDefault(emptyList())
+    }
+}

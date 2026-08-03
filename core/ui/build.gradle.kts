@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.cuhub.android.library)
     alias(libs.plugins.cuhub.android.library.compose)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -15,4 +16,8 @@ dependencies {
     implementation(libs.direct.core)
     implementation(projects.core.lms.domain)
     implementation(projects.core.designsystem)
+
+    implementation(platform(libs.arrow.bom))
+    implementation(libs.arrow.optics)
+    ksp(libs.arrow.optics.ksp)
 }

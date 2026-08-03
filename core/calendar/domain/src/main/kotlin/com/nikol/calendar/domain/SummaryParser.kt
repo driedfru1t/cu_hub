@@ -9,9 +9,8 @@ import com.nikol.calendar.domain.model.Tower
 
 object SummaryParser {
 
-    // Добавлен флаг (?U) перед \b — заставляет \b понимать кириллицу (Таганка, Агат...)
     private val ROOM_REGEX = Regex(
-        """(?U)\b([BF]\d{3,4}(?:\s*[\+-]\s*[BF]?\d{3,4})*|[BF]\d{3,4}-[BF]?\d{3,4}|Агат|Сетунь|Таганка|Таганке)\b""",
+        """\b([BF]\d{3,4}(?:\s*[\+-]\s*[BF]?\d{3,4})*|[BF]\d{3,4}-[BF]?\d{3,4})\b|Агат|Сетунь|Таганка|Таганке""",
         RegexOption.IGNORE_CASE
     )
 

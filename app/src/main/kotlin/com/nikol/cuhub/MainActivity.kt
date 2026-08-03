@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity() {
                 LocalAppDep provides mainComponent
             ) {
                 CUHubTheme {
-                    val backStack = rememberNavBackStack(Auth)
+                    val backStack = rememberNavBackStack(Main)
                     NavDisplay(
                         backStack = backStack,
                         entryDecorators = listOf(

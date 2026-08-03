@@ -3,6 +3,7 @@ package com.nikol.calendar.data
 import android.util.Log
 import arrow.core.raise.context.Raise
 import arrow.core.raise.context.withError
+import arrow.fx.coroutines.parMap
 import com.nikol.calendar.data.local.CalendarDao
 import com.nikol.calendar.data.local.CalendarEntity
 import com.nikol.calendar.data.local.CalendarEventDao
@@ -17,14 +18,8 @@ import com.nikol.calendar.domain.model.CalendarEvent
 import com.nikol.calendar.domain.repo.ScheduleRepository
 import com.nikol.sync.SyncResult
 import com.nikol.sync.Syncable
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.sync.Semaphore
-import kotlinx.coroutines.sync.withPermit
 import java.time.Instant
 import javax.inject.Inject
 
@@ -39,18 +34,23 @@ class ScheduleRepositoryImpl @Inject constructor(
     private val calendarDao: CalendarDao,
     private val recurrenceParser: RecurrenceParser
 ) : ScheduleRepository, Syncable {
+
     override fun observeEvents(
         start: Instant,
         end: Instant
     ): Flow<List<CalendarEvent>> {
-        return calendarEventDao.observeEvents(start, end).map {
-            it.flatMap { entity ->
-                recurrenceParser.expand(
+        return calendarEventDao.observeEvents(start, end).map { entities ->
+            val expandedEvents = entities.flatMap { entity ->
+                val expanded = recurrenceParser.expand(
                     entity = entity,
                     from = start,
                     to = end
                 )
-            }.sortedBy { e -> e.start }
+                expanded
+            }
+            val distinctEvents = expandedEvents.distinctBy { event -> event.id to event.start }
+            val sorted = distinctEvents.sortedBy { e -> e.start }
+            sorted
         }
     }
 
@@ -109,7 +109,6 @@ class ScheduleRepositoryImpl @Inject constructor(
         response: ResponseCalendarDTO
     ) {
         val changes = response.toDatabaseChanges()
-
         calendarEventDao.deleteByHrefs(changes.delete)
         calendarEventDao.upsert(changes.upsert)
 
@@ -122,34 +121,31 @@ class ScheduleRepositoryImpl @Inject constructor(
     }
 
     context(raise: Raise<CalDavError>)
-    private suspend fun CoroutineScope.syncCalendars(
+    private suspend fun syncCalendars(
         hrefs: List<String>
     ) {
-        val semaphore = Semaphore(4)
-        val response = hrefs.map { calendarHref ->
-            async {
-                semaphore.withPermit {
-                    val syncToken = calendarDao.getByHref(calendarHref)?.syncToken
-                    calendarHref to with(calDavService) {
-                        raise.discoverCalendars(
-                            path = calendarHref,
-                            syncToken = syncToken
-                        )
-                    }
-                }
+
+        val response = hrefs.parMap(concurrency = 4) { calendarHref ->
+            val syncToken = calendarDao.getByHref(calendarHref)?.syncToken
+            val discoverResult = with(calDavService) {
+                raise.discoverCalendars(
+                    path = calendarHref,
+                    syncToken = syncToken
+                )
             }
-        }.awaitAll()
+            calendarHref to discoverResult
+        }
 
-        response.forEach {
-
-            applyResponse(it.first, it.second)
+        response.forEach { (calendarHref, discoverResult) ->
+            applyResponse(calendarHref, discoverResult)
         }
     }
 
     context(raise: Raise<ScheduleError>)
-    override suspend fun refresh() = coroutineScope {
+    override suspend fun refresh() {
         withError(CalDavError::toScheduleError) {
             val calendarHrefs = discoverCalendarHrefs()
+            Log.d("DEBUG", calendarHrefs.toString())
             syncCalendars(calendarHrefs)
         }
     }

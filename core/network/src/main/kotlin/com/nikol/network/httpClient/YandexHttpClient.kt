@@ -28,7 +28,7 @@ internal fun provideYaHttpClient(okHttpClient: OkHttpClient, tManager: TokenMana
         }
 
         install(Logging) {
-            level = LogLevel.ALL
+            level = LogLevel.INFO
             logger = Logger.ANDROID
         }
         install(HttpRequestRetry) {

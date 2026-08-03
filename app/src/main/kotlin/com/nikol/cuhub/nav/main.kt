@@ -32,6 +32,8 @@ import com.nikol.lms_impl.nav.lms
 import com.nikol.navigation.Main
 import com.nikol.navigation.Navigator
 import com.nikol.navigation.rememberNavigationState
+import com.nikol.schedule_api.Schedule
+import com.nikol.schedule_impl.nav.schedule
 import com.nikol.ui.R
 import kotlinx.serialization.Serializable
 
@@ -47,14 +49,14 @@ data object RouteC : NavKey
 
 val TOP_LEVEL_ROUTES = mapOf(
     Courses to NavBarItem(icon = R.drawable.school),
-    RouteC to NavBarItem(R.drawable.science),
+    Schedule to NavBarItem(R.drawable.science),
     RouteB to NavBarItem(R.drawable.design_services)
 )
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 fun EntryProviderScope<NavKey>.mainGraph() {
     entry<Main> {
-        val navigationState = rememberNavigationState(Courses, TOP_LEVEL_ROUTES.keys)
+        val navigationState = rememberNavigationState(Schedule, TOP_LEVEL_ROUTES.keys)
         val navigator = remember { Navigator(navigationState) }
         val bottomSheetStrategy = remember { BottomSheetSceneStrategy<NavKey>() }
 
@@ -66,6 +68,7 @@ fun EntryProviderScope<NavKey>.mainGraph() {
                 onCourseInfo = { navigator.navigate(it) },
                 onMaterialDetail = { navigator.navigate(it) }
             )
+            schedule()
             entry<RouteB> {
                 Scaffold { paddingValues ->
                     Box(

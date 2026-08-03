@@ -76,8 +76,8 @@ class CalDavService @Inject constructor(
             apiCall = {
                 httpClient.request(path) {
                     header("Depth", 1)
-                    method = HttpMethod("PROPFIND")
-                    setBody(setBody(syncCollectionBody(syncToken)))
+                    method = HttpMethod("REPORT")
+                    setBody(syncCollectionBody(syncToken))
                 }
             },
             mapError = { networkError -> CalDavError.Network(networkError) },

@@ -7,6 +7,7 @@ import com.nikol.calendar.data.local.CalendarDao
 import com.nikol.calendar.data.local.CalendarEntity
 import com.nikol.calendar.data.local.CalendarEventDao
 import com.nikol.calendar.data.local.CalendarEventEntity
+import com.nikol.calendar.data.local.JsonConverters
 import com.nikol.lms.data.local.DatabaseConverters
 import com.nikol.lms.data.local.dao.CourseOverviewDao
 import com.nikol.lms.data.local.dao.CoursesDao
@@ -24,10 +25,10 @@ import com.nikol.lms.data.local.entity.LongreadEntity
         LongreadEntity::class,
         ExerciseEntity::class,
         CalendarEventEntity::class,
-        CalendarEntity::class
+        CalendarEntity::class,
     ], version = 1, exportSchema = false
 )
-@TypeConverters(DatabaseConverters::class, CalendarConverters::class)
+@TypeConverters(DatabaseConverters::class, CalendarConverters::class, JsonConverters::class)
 internal abstract class AppDatabase : RoomDatabase() {
     abstract fun courseDao(): CoursesDao
     abstract fun courseOverviewDao(): CourseOverviewDao

@@ -57,7 +57,6 @@ fun EntryProviderScope<NavKey>.material() {
                     }
 
                     is ThemeMaterialState.Error -> {
-                        // Эстетичное отображение ошибки в стиле M3
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center,

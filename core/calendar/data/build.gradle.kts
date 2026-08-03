@@ -14,6 +14,7 @@ dependencies {
 
     implementation(platform(libs.arrow.bom))
     implementation(libs.arrow.core)
+    implementation(libs.arrow.fx.coroutines)
 
     implementation(libs.room)
     implementation(libs.room.ktx)
