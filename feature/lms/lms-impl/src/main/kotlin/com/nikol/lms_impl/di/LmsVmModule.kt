@@ -2,6 +2,7 @@ package com.nikol.lms_impl.di
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.nikol.lms_impl.viewModels.ArchiveCourseVM
 import com.nikol.lms_impl.viewModels.courseDeatil.CourseDetailVM
 import com.nikol.lms_impl.viewModels.CoursesViewModel
 import com.nikol.lms_impl.viewModels.MaterialVM
@@ -28,6 +29,11 @@ interface CoursesViewModelModule {
     @IntoMap
     @ViewModelKey(CoursesViewModel::class)
     fun bindCoursesViewModel(coursesViewModel: CoursesViewModel): ViewModel
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(ArchiveCourseVM::class)
+    fun bindArchiveCourseVM(archiveCourseVM: ArchiveCourseVM): ViewModel
 }
 
 @Module

@@ -13,6 +13,7 @@ import com.nikol.lms.data.mapper.toCourseError
 import com.nikol.lms.data.mapper.toDomain
 import com.nikol.lms.data.mapper.toLocalEntities
 import com.nikol.lms.data.mapper.toLocalRelation
+import com.nikol.lms.data.remote.model.common.PublicationStateDTO
 import com.nikol.lms.data.remote.model.course.CourseSummaryItemDto
 import com.nikol.lms.data.remote.model.course.ParticipationTypeDto
 import com.nikol.lms.data.remote.service.CourseService
@@ -24,6 +25,7 @@ import com.nikol.lms.domain.model.CourseSummary
 import com.nikol.lms.domain.model.DeadlineCourse
 import com.nikol.lms.domain.model.LongreadMaterial
 import com.nikol.lms.domain.model.ParticipationType
+import com.nikol.lms.domain.model.PublicationState
 import com.nikol.lms.domain.repo.CourseRepository
 import com.nikol.network.NetworkError
 import kotlinx.coroutines.CoroutineDispatcher
@@ -130,13 +132,26 @@ class CourseRepositoryImpl @Inject constructor(
         }.flowOn(dispatcher)
     }
 
+    private fun stateToDto(state: PublicationState): PublicationStateDTO {
+        return when (state) {
+            PublicationState.PUBLISHED -> PublicationStateDTO.PUBLISHED
+            PublicationState.ARCHIVED -> PublicationStateDTO.ARCHIVED
+            PublicationState.DRAFT -> PublicationStateDTO.DRAFT
+        }
+    }
+
     /**
      * [Эндпоинт 5] Список всех доступных студенту курсов.
      * GET /micro-lms/courses/student
      * @param limit Лимит записей. По умолчанию передается большое число (например, 10000).
      */
-    override suspend fun getCourses(limit: Int): Either<CourseError, List<CourseSummary>> =
-        courseService.getCourses()
+    override suspend fun getCourses(
+        publicationState: PublicationState,
+        limit: Int,
+        offset: Int,
+        participationType: ParticipationType?
+    ): Either<CourseError, List<CourseSummary>> =
+        courseService.getCourses(stateToDto(publicationState), participationType, limit, offset)
             .map { list -> list.items.map { it.toDomain() } }
             .mapLeft { it.toCourseError() }
 

@@ -5,6 +5,7 @@ import com.nikol.common.Dispatcher
 import com.nikol.lms.domain.repo.CourseRepository
 import com.nikol.lms.domain.repo.GradeRepository
 import com.nikol.lms.domain.repo.TaskRepository
+import com.nikol.lms.domain.useCase.GetArchiveCourses
 import com.nikol.lms.domain.useCase.GetCourseActivitiesPerformanceUseCase
 import com.nikol.lms.domain.useCase.GetCourseDeadlines
 import com.nikol.lms.domain.useCase.GetCourseExercisesUseCase
@@ -96,6 +97,15 @@ class LmsUseCaseModule {
         @Dispatcher(CuHubDispatcher.IO) coroutineDispatcher: CoroutineDispatcher
     ): GetCourseScoreUseCase {
         return GetCourseScoreUseCase(coroutineDispatcher, repo)
+    }
+
+    @Provides
+    @LmsScope
+    fun provideGetArchiveCourses(
+        repo: CourseRepository,
+        @Dispatcher(CuHubDispatcher.IO) coroutineDispatcher: CoroutineDispatcher
+    ): GetArchiveCourses {
+        return GetArchiveCourses(coroutineDispatcher, repo)
     }
 
 }

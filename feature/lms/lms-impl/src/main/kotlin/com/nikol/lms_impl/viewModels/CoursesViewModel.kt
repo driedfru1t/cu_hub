@@ -19,6 +19,8 @@ interface CoursesRouter : Router {
     fun toCourse(id: Int, name: String)
 
     fun toMoreInfo(id: Int, name: String)
+
+    fun toArchive()
 }
 
 class CoursesViewModel @Inject constructor(
@@ -90,5 +92,6 @@ class CoursesViewModel @Inject constructor(
         onNavigate<CoursesIntent.ClickToCourse> { toCourse(it.id, it.name) }
 
         onNavigate<CoursesIntent.ClickToMore> { toMoreInfo(it.id, it.name) }
+        onNavigate<CoursesIntent.ClickToArchive> { toArchive() }
     }
 }

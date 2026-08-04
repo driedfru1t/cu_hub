@@ -8,6 +8,8 @@ import com.nikol.lms.domain.model.CourseScore
 import com.nikol.lms.domain.model.CourseSummary
 import com.nikol.lms.domain.model.DeadlineCourse
 import com.nikol.lms.domain.model.LongreadMaterial
+import com.nikol.lms.domain.model.ParticipationType
+import com.nikol.lms.domain.model.PublicationState
 import kotlinx.coroutines.flow.Flow
 
 interface CourseRepository {
@@ -19,7 +21,12 @@ interface CourseRepository {
      * GET /micro-lms/courses/student
      * @param limit Лимит записей. По умолчанию передается большое число (например, 10000).
      */
-    suspend fun getCourses(limit: Int = 10000): Either<CourseError, List<CourseSummary>>
+    suspend fun getCourses(
+        publicationState: PublicationState,
+        limit: Int = 10000,
+        offset: Int = 0,
+        participationType: ParticipationType? = null
+    ): Either<CourseError, List<CourseSummary>>
 
     /**
      * [Эндпоинт 6] Обзор конкретного курса (детали, силлабус, описание).

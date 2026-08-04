@@ -10,4 +10,5 @@ sealed interface CoursesIntent : DirectIntent {
     data class ChangeTab(val participationType: ParticipationType) : CoursesIntent
     data class ClickToCourse(val id: Int, val name: String) : CoursesIntent
     data class ClickToMore(val id: Int, val name: String) : CoursesIntent
+    data object ClickToArchive : CoursesIntent
 }

@@ -27,6 +27,7 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.example.nav3recipes.bottomsheet.BottomSheetSceneStrategy
+import com.nikol.lms_api.ArchiveCourses
 import com.nikol.lms_api.Courses
 import com.nikol.lms_impl.nav.lms
 import com.nikol.navigation.Main
@@ -56,17 +57,14 @@ val TOP_LEVEL_ROUTES = mapOf(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 fun EntryProviderScope<NavKey>.mainGraph() {
     entry<Main> {
-        val navigationState = rememberNavigationState(Schedule, TOP_LEVEL_ROUTES.keys)
+        val navigationState = rememberNavigationState(Courses, TOP_LEVEL_ROUTES.keys)
         val navigator = remember { Navigator(navigationState) }
         val bottomSheetStrategy = remember { BottomSheetSceneStrategy<NavKey>() }
 
         val entryProvider = entryProvider {
             lms(
                 onBack = { navigator.onBack() },
-                onDetail = { navigator.navigate(it) },
-                onCourseAction = { navigator.navigate(it) },
-                onCourseInfo = { navigator.navigate(it) },
-                onMaterialDetail = { navigator.navigate(it) }
+                navigateTo = { navigator.navigate(it) }
             )
             schedule()
             entry<RouteB> {

@@ -7,6 +7,9 @@ import kotlinx.serialization.Serializable
 data object Courses : NavKey
 
 @Serializable
+data object ArchiveCourses : NavKey
+
+@Serializable
 data class Course(
     val id: Int,
     val name: String

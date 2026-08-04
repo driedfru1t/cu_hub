@@ -47,6 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation3.runtime.NavKey
 import com.nikol.lms_api.CourseInfo
 import com.nikol.lms_api.ThemeMaterial
 import com.nikol.lms_impl.mvi.intent.CourseDetailIntent
@@ -66,14 +67,13 @@ import kotlinx.coroutines.launch
 fun CourseDetailScreen(
     name: String,
     onBack: () -> Unit,
-    onInfoClick: (CourseInfo) -> Unit,
-    onMaterialDetail: (ThemeMaterial) -> Unit
+    navigateTo: (NavKey) -> Unit,
 ) {
     val viewModel = daggerViewModel<CourseDetailVM, CourseDetailRouter> {
         object : CourseDetailRouter {
             override fun onBack() = onBack()
             override fun onInfo(time: String?, sillabus: String?) =
-                onInfoClick(CourseInfo(time, sillabus))
+                navigateTo(CourseInfo(time, sillabus))
         }
     }
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -81,7 +81,7 @@ fun CourseDetailScreen(
         state = state,
         name = name,
         onIntent = viewModel::setIntent,
-        onMaterialDetail = onMaterialDetail
+        onMaterialDetail = navigateTo
     )
 }
 

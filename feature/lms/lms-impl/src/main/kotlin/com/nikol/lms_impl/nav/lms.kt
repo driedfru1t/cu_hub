@@ -9,11 +9,8 @@ import com.nikol.lms_api.ThemeMaterial
 
 fun EntryProviderScope<NavKey>.lms(
     onBack: () -> Unit,
-    onDetail: (Course) -> Unit,
-    onCourseAction: (CourseAction) -> Unit,
-    onCourseInfo: (CourseInfo) -> Unit,
-    onMaterialDetail: (ThemeMaterial) -> Unit
+    navigateTo: (NavKey) -> Unit
 ) {
-    courses(onBack, onDetail, onCourseAction, onCourseInfo, onMaterialDetail)
+    courses(onBack, navigateTo)
     material()
 }

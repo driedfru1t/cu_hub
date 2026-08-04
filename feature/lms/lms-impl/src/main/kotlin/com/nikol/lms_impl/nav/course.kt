@@ -8,12 +8,13 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.metadata
 import com.example.nav3recipes.bottomsheet.BottomSheetSceneStrategy
 import com.nikol.di.ext.rememberComponent
+import com.nikol.lms_api.ArchiveCourses
 import com.nikol.lms_api.Course
 import com.nikol.lms_api.CourseAction
 import com.nikol.lms_api.CourseInfo
 import com.nikol.lms_api.Courses
-import com.nikol.lms_api.ThemeMaterial
 import com.nikol.lms_impl.screens.ActionCourseScreen
+import com.nikol.lms_impl.screens.ArchiveCourseScreen
 import com.nikol.lms_impl.screens.CourseDetailScreen
 import com.nikol.lms_impl.screens.CoursesScreen
 import com.nikol.lms_impl.viewModels.components.CourseDetailComponentVM
@@ -24,17 +25,14 @@ import com.nikol.viewmodel.LocalViewModelFactory
 @OptIn(ExperimentalMaterial3Api::class)
 fun EntryProviderScope<NavKey>.courses(
     onBack: () -> Unit,
-    onDetail: (Course) -> Unit,
-    onCourseAction: (CourseAction) -> Unit,
-    onInfoClick: (CourseInfo) -> Unit,
-    onMaterialDetail: (ThemeMaterial) -> Unit
+    navigateTo: (NavKey) -> Unit
 ) {
     entry<Courses> {
         val lmsComponent = rememberComponent { CoursesComponentViewModel(it) }
         CompositionLocalProvider(
             LocalViewModelFactory provides lmsComponent.viewModelFactory()
         ) {
-            CoursesScreen(onDetail, onCourseAction)
+            CoursesScreen(navigateTo)
         }
     }
     entry<Course>(
@@ -67,8 +65,7 @@ fun EntryProviderScope<NavKey>.courses(
             CourseDetailScreen(
                 name = course.name,
                 onBack = onBack,
-                onMaterialDetail = onMaterialDetail,
-                onInfoClick = onInfoClick
+                navigateTo = navigateTo
             )
         }
     }
@@ -88,5 +85,14 @@ fun EntryProviderScope<NavKey>.courses(
         metadata = BottomSheetSceneStrategy.bottomSheet()
     ) { course ->
         ActionCourseScreen(course.timeChannelUrl, course.sillabusUrl)
+    }
+
+    entry<ArchiveCourses> {
+        val lmsComponent = rememberComponent { CoursesComponentViewModel(it) }
+        CompositionLocalProvider(
+            LocalViewModelFactory provides lmsComponent.viewModelFactory()
+        ) {
+            ArchiveCourseScreen(navigateTo, onBack)
+        }
     }
 }
