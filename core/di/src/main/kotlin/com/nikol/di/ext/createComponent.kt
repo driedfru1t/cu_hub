@@ -40,3 +40,4 @@ inline fun <reified VM : ComponentViewModel<C>, reified C> rememberComponent(
     val componentViewModel: VM = viewModel(key = key, factory = factory)
     return componentViewModel.component
 }
+

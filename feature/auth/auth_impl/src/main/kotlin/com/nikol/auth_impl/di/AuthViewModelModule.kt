@@ -2,7 +2,7 @@ package com.nikol.auth_impl.di
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.nikol.auth_impl.viewModel.CuAuthViewModel
+import com.nikol.auth_impl.viewModel.AuthViewModel
 import com.nikol.viewmodel.DaggerViewModel
 import com.nikol.viewmodel.ViewModelKey
 import dagger.Binds
@@ -14,8 +14,8 @@ interface AuthViewModelModule {
 
     @Binds
     @IntoMap
-    @ViewModelKey(CuAuthViewModel::class)
-    fun bindCuAuthViewModel(viewModel: CuAuthViewModel): ViewModel
+    @ViewModelKey(AuthViewModel::class)
+    fun bindCuAuthViewModel(viewModel: AuthViewModel): ViewModel
 
     @Binds
     @AuthScope

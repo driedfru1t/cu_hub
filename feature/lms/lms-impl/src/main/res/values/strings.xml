@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_lms_impl_all">All</string>
+    <string name="feature_lms_impl_required">Required</string>
+    <string name="feature_lms_impl_elective">Elective</string>
+    <string name="feature_lms_impl_listener">Listener</string>
+    <string name="feature_lms_impl_internal">Internal</string>
+    <string name="feature_lms_impl_my_courses">My courses</string>
+    <string name="feature_lms_impl_course_dashboard_title">Materials and communication</string>
+    <string name="feature_lms_impl_course_dashboard_syllabus_title">Syllabus</string>
+    <string name="feature_lms_impl_course_dashboard_syllabus_subtitle">Course program and rules</string>
+    <string name="feature_lms_impl_course_dashboard_chat_title">Course chat</string>
+    <string name="feature_lms_impl_course_dashboard_chat_subtitle">Discussions and questions</string>
+    <string name="feature_lms_impl_course_dashboard_empty">Additional information is not available yet</string>
+    <string name="feature_lms_impl_course_dashboard_navigate">Open</string>
+</resources>

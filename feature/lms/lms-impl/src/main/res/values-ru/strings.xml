@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_lms_impl_all">Все</string>
+    <string name="feature_lms_impl_required">Обязательные</string>
+    <string name="feature_lms_impl_elective">Факультативные</string>
+    <string name="feature_lms_impl_listener">Вольнослушатель</string>
+    <string name="feature_lms_impl_internal">Внутренние</string>
+    <string name="feature_lms_impl_my_courses">Мои курсы</string>
+    <string name="feature_lms_impl_course_dashboard_title">Материалы и общение</string>
+    <string name="feature_lms_impl_course_dashboard_syllabus_title">Силлабус</string>
+    <string name="feature_lms_impl_course_dashboard_syllabus_subtitle">Программа и правила курса</string>
+    <string name="feature_lms_impl_course_dashboard_chat_title">Чат курса</string>
+    <string name="feature_lms_impl_course_dashboard_chat_subtitle">Обсуждения и вопросы</string>
+    <string name="feature_lms_impl_course_dashboard_empty">Дополнительная информация пока недоступна</string>
+    <string name="feature_lms_impl_course_dashboard_navigate">Перейти</string>
+</resources>

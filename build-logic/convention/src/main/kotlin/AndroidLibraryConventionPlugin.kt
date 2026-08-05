@@ -29,7 +29,8 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
 
             dependencies {
                 testImplementation(libs.junit)
-                androidTestImplementation(libs.androidx.junit)
+                testImplementation(libs.kotlin.test)
+                androidTestImplementation(libs.kotlin.test)
             }
         }
     }

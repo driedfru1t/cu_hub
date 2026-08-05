@@ -41,6 +41,9 @@ abstract class RouterViewModel<INTENT : DirectIntent, STATE : DirectState, EFFEC
             if (isFinal) detachRouter()
         }
     }
+
+
+
     override fun onCleared() {
         detachRouter()
         super.onCleared()

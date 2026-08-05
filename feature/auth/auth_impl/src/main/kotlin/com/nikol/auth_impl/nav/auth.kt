@@ -25,7 +25,7 @@ inline fun EntryProviderScope<NavKey>.authGraph(
 ) {
     entry<Auth> {
         val authComponent = rememberComponent { appDep -> AuthComponentViewModel(appDep) }
-        val backStack = rememberNavBackStack(Start)
+        val backStack = rememberNavBackStack(YandexAuth)
         CompositionLocalProvider(
             LocalViewModelFactory provides authComponent.viewModelFactory()
         ) {
@@ -38,7 +38,7 @@ inline fun EntryProviderScope<NavKey>.authGraph(
                         rememberViewModelStoreNavEntryDecorator()
                     ),
                     entryProvider = entryProvider {
-                        entry<Start> { StartAuthScreen { onAuthSuccess() } }
+                        entry<Start> { StartAuthScreen { backStack.add(CuAuth) } }
                         entry<CuAuth> {
                             CuAuthScreen {
                                 backStack.removeLastOrNull()
