@@ -20,7 +20,7 @@ sealed interface HtmlBlock {
     data class Heading(val content: AnnotatedString, val level: Int) : HtmlBlock
     data class Quote(val content: AnnotatedString) : HtmlBlock
 
-    // Списки
+    // списки
     data class BulletList(val items: List<AnnotatedString>) : HtmlBlock
     data class OrderedList(val items: List<AnnotatedString>) : HtmlBlock
 
@@ -42,7 +42,7 @@ class HtmlToUiParser @Inject constructor() {
                 "h1", "h2", "h3" -> parseHeading(element)
                 "p" -> HtmlBlock.Text(parseInline(element))
                 "ul" -> HtmlBlock.BulletList(parseList(element))
-                "ol" -> HtmlBlock.OrderedList(parseList(element)) // Поддержка нумерованных списков
+                "ol" -> HtmlBlock.OrderedList(parseList(element))
                 "pre" -> parseCodeBlock(element)
                 "blockquote" -> HtmlBlock.Quote(parseInline(element))
                 "hr" -> HtmlBlock.Divider
@@ -92,7 +92,6 @@ class HtmlToUiParser @Inject constructor() {
                             }
 
                             "code" -> {
-                                // Добавляем тег-маркер "CODE" (без цвета), чтобы потом покрасить его в UI
                                 pushStringAnnotation("CODE", "")
                                 withStyle(CodeSpanStyle) { append(node.text()) }
                                 pop()
@@ -107,7 +106,6 @@ class HtmlToUiParser @Inject constructor() {
                             "br" -> append("\n")
                             "span" -> append(parseInline(node))
 
-                            // Поддержка вложенных маркированных списков внутри абзацев
                             "ul" -> {
                                 append("\n")
                                 node.children().filter { child -> child.tagName() == "li" }.forEach { li ->
@@ -117,7 +115,6 @@ class HtmlToUiParser @Inject constructor() {
                                 }
                             }
 
-                            // Поддержка вложенных пронумерованных списков внутри абзацев
                             "ol" -> {
                                 append("\n")
                                 node.children().filter { child -> child.tagName() == "li" }.forEachIndexed { index, li ->
@@ -136,7 +133,6 @@ class HtmlToUiParser @Inject constructor() {
     }
 
     private fun isTrashElement(element: Element): Boolean {
-        // Добавлены pre, ul, ol в белый список тегов, чтобы они не отбрасывались, если Jsoup посчитает их текст пустым
         return element.text().isBlank() && element.tagName() !in listOf("hr", "br", "img", "pre", "ul", "ol")
     }
 

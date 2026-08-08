@@ -140,17 +140,19 @@ fun CourseMaterialsPage(
             }
 
             is Lce.Content -> {
-                stickyHeader(key = "material_title") {
-                    Text(
-                        text = "Материалы",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.background)
-                            .padding(horizontal = 16.dp, vertical = 4.dp)
-                    )
+                if (state.value.deadlines.isNotEmpty()) {
+                    stickyHeader(key = "material_title") {
+                        Text(
+                            text = "Материалы",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(MaterialTheme.colorScheme.background)
+                                .padding(horizontal = 16.dp, vertical = 4.dp)
+                        )
+                    }
                 }
 
                 items(items = state.value.materials.themes, key = { it.id }) { theme ->

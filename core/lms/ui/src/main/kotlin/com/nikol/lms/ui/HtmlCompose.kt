@@ -55,8 +55,8 @@ import com.nikol.network.ImageFileRequest
 
 @Composable
 fun FeedItemUi.RenderHtmlCompose(
+    modifier: Modifier = Modifier,
     onFileClick: (filename: String, version: String?) -> Unit = { _, _ -> },
-    modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier.fillMaxWidth()) {
         when (this@RenderHtmlCompose) {
@@ -99,7 +99,7 @@ fun FileCard(
     filename: String,
     version: String?,
     modifier: Modifier = Modifier,
-    containerColor: Color = MaterialTheme.colorScheme.surfaceContainer // По умолчанию стандартный контейнер M3
+    containerColor: Color = MaterialTheme.colorScheme.surfaceContainer
 ) {
     Surface(
         modifier = modifier
@@ -109,7 +109,6 @@ fun FileCard(
         color = containerColor,
         shape = RoundedCornerShape(16.dp)
     ) {
-        // Используем ListItem для идеальных гайдлайн-отступов
         ListItem(
             colors = ListItemDefaults.colors(containerColor = Color.Transparent),
             headlineContent = {
@@ -132,7 +131,7 @@ fun FileCard(
                 Box(
                     modifier = Modifier
                         .size(40.dp)
-                        .clip(RoundedCornerShape(12.dp)) // Squircle (мягкий квадрат)
+                        .clip(RoundedCornerShape(12.dp))
                         .background(MaterialTheme.colorScheme.secondaryContainer),
                     contentAlignment = Alignment.Center
                 ) {
@@ -166,13 +165,12 @@ fun HomeworkCard(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp), // Как в списке курсов
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            // Шапка: Иконка задания + Название
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
@@ -197,7 +195,6 @@ fun HomeworkCard(
                 )
             }
 
-            // Аккуратная плашка дедлайна в едином стиле
             if (deadline != null) {
                 Spacer(modifier = Modifier.height(12.dp))
                 Surface(
@@ -230,14 +227,13 @@ fun HomeworkCard(
                 HtmlContentRenderer(blocks = descriptionBlocks)
             }
 
-            // Группировка файлов в едином блоке
             if (attachedFiles.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainer // Чуть темнее чем сама карточка, создает эффект вдавленности
+                    color = MaterialTheme.colorScheme.surfaceContainer
                 ) {
                     Column {
                         attachedFiles.forEachIndexed { index, file ->
@@ -247,10 +243,8 @@ fun HomeworkCard(
                                 filename = file.filename,
                                 version = file.version,
                                 onClick = onFileClick,
-                                // Делаем прозрачным, так как общий контейнер уже имеет цвет
                                 containerColor = Color.Transparent
                             )
-                            // Разделитель между файлами, кроме последнего
                             if (index < attachedFiles.lastIndex) {
                                 HorizontalDivider(
                                     modifier = Modifier.padding(horizontal = 16.dp),
@@ -279,12 +273,11 @@ fun ImageBlock(
             .build()
     }
 
-    // Убрали border. Чистый clip смотрится премиальнее и не создает визуального "мусора"
     Box(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surfaceContainer) // Фон на случай загрузки или PNG с альфа-каналом
+            .background(MaterialTheme.colorScheme.surfaceContainer)
     ) {
         AsyncImage(
             model = imageRequest,
@@ -306,7 +299,7 @@ fun HtmlContentRenderer(
 
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp) // Сделали чуть плотнее (было 10)
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         blocks.forEach { block ->
             when (block) {
@@ -320,7 +313,7 @@ fun HtmlContentRenderer(
                         text = rememberThemeAppliedHtml(block.content),
                         style = typography,
                         color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(top = if (block.level == 1) 8.dp else 4.dp) // Чуть больше воздуха перед крупными заголовками
+                        modifier = Modifier.padding(top = if (block.level == 1) 8.dp else 4.dp)
                     )
                 }
 
@@ -341,19 +334,18 @@ fun HtmlContentRenderer(
                 }
 
                 is HtmlBlock.Quote -> {
-                    // Цитата теперь использует surfaceContainer вместо хардкодной прозрачности primary
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(12.dp))
                             .background(MaterialTheme.colorScheme.surfaceContainer)
-                            .padding(end = 14.dp), // Padding слева контролируется полоской
+                            .padding(end = 14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(
                             modifier = Modifier
                                 .width(4.dp)
-                                .height(40.dp) // Фиксированная или minHeight полоска
+                                .height(40.dp)
                                 .clip(RoundedCornerShape(topStart = 12.dp, bottomStart = 12.dp))
                                 .background(MaterialTheme.colorScheme.primary)
                         )
@@ -364,7 +356,9 @@ fun HtmlContentRenderer(
                                 fontStyle = FontStyle.Italic,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             ),
-                            modifier = Modifier.padding(vertical = 12.dp).weight(1f)
+                            modifier = Modifier
+                                .padding(vertical = 12.dp)
+                                .weight(1f)
                         )
                     }
                 }
@@ -374,12 +368,11 @@ fun HtmlContentRenderer(
                         block.items.forEach { item ->
                             Row(
                                 modifier = Modifier.padding(start = 4.dp),
-                                // Выравнивание по верху, чтобы буллит стоял ровно напротив первой строки, если текст перенесется
                                 verticalAlignment = Alignment.Top
                             ) {
                                 Box(
                                     modifier = Modifier
-                                        .padding(top = 8.dp) // Опускаем буллит до оптического центра первой строки
+                                        .padding(top = 8.dp)
                                         .size(6.dp)
                                         .clip(CircleShape)
                                         .background(MaterialTheme.colorScheme.primary)
@@ -422,9 +415,9 @@ fun HtmlContentRenderer(
                 is HtmlBlock.Code -> {
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp), // Более скругленные края
-                        color = Color(0xFF1E2128), // Чуть более мягкий темный цвет
-                        border = null // Убрали border, он тут излишний
+                        shape = RoundedCornerShape(16.dp),
+                        color = Color(0xFF1E2128),
+                        border = null
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             if (block.language.isNotEmpty()) {
@@ -438,22 +431,37 @@ fun HtmlContentRenderer(
                                     Text(
                                         text = block.language.uppercase(),
                                         style = MaterialTheme.typography.labelMedium,
-                                        color = Color(0xFF8B949E), // Серый цвет для метаинформации
+                                        color = Color(0xFF8B949E),
                                         fontWeight = FontWeight.Medium
                                     )
-                                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                        // "Кнопочки" как в mac/IDE для декорации
-                                        Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFFED6A5E)))
-                                        Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFFF4BF4F)))
-                                        Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFF61C554)))
-                                    }
+//                                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+//                                        // "Кнопочки" как в mac/IDE для декорации
+//                                        Box(
+//                                            modifier = Modifier
+//                                                .size(8.dp)
+//                                                .clip(CircleShape)
+//                                                .background(Color(0xFFED6A5E))
+//                                        )
+//                                        Box(
+//                                            modifier = Modifier
+//                                                .size(8.dp)
+//                                                .clip(CircleShape)
+//                                                .background(Color(0xFFF4BF4F))
+//                                        )
+//                                        Box(
+//                                            modifier = Modifier
+//                                                .size(8.dp)
+//                                                .clip(CircleShape)
+//                                                .background(Color(0xFF61C554))
+//                                        )
+//                                    }
                                 }
                             }
                             Text(
                                 text = block.codeText,
                                 style = MaterialTheme.typography.bodyMedium.copy(
                                     fontFamily = FontFamily.Monospace,
-                                    lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.2f, // Код любит воздух между строками
+                                    lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.2f,
                                     color = Color(0xFFE5E7EB)
                                 ),
                                 modifier = Modifier.horizontalScroll(rememberScrollState())
