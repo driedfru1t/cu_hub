@@ -1,7 +1,11 @@
 package com.nikol.lms.ui
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -22,10 +26,14 @@ import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.ErrorOutline
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -51,11 +59,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
+import com.nikol.lms.backround.DownloadStatus
+import com.nikol.lms.backround.formatFileName
 import com.nikol.network.ImageFileRequest
+import kotlinx.collections.immutable.ImmutableMap
 
 @Composable
 fun FeedItemUi.RenderHtmlCompose(
     modifier: Modifier = Modifier,
+    files: ImmutableMap<String, DownloadStatus>,
     onFileClick: (filename: String, version: String?) -> Unit = { _, _ -> },
 ) {
     Box(modifier = modifier.fillMaxWidth()) {
@@ -70,7 +82,8 @@ fun FeedItemUi.RenderHtmlCompose(
                     size = formattedSize,
                     filename = filename,
                     version = version,
-                    onClick = { i1, i2 -> onFileClick(i1, i2) }
+                    onClick = { i1, i2 -> onFileClick(i1, i2) },
+                    files = files
                 )
             }
 
@@ -80,7 +93,8 @@ fun FeedItemUi.RenderHtmlCompose(
                     deadline = deadline,
                     descriptionBlocks = descriptionBlocks,
                     attachedFiles = attachedFiles,
-                    onFileClick = onFileClick
+                    onFileClick = onFileClick,
+                    files = files
                 )
             }
 
@@ -98,35 +112,21 @@ fun FileCard(
     onClick: (String, String?) -> Unit,
     filename: String,
     version: String?,
+    files: ImmutableMap<String, DownloadStatus>,
     modifier: Modifier = Modifier,
     containerColor: Color = MaterialTheme.colorScheme.surfaceContainer
 ) {
+    val fileId = remember(name, version) { formatFileName(name, version) }
+
     Surface(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .clickable { onClick(filename, version) },
+            .clickable { onClick(name, version) },
         color = containerColor,
         shape = RoundedCornerShape(16.dp)
     ) {
         ListItem(
-            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-            headlineContent = {
-                Text(
-                    text = name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 1,
-                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                )
-            },
-            supportingContent = {
-                Text(
-                    text = size,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            },
             leadingContent = {
                 Box(
                     modifier = Modifier
@@ -144,13 +144,89 @@ fun FileCard(
                 }
             },
             trailingContent = {
+                FileStatusIcon(
+                    status = files[fileId] ?: DownloadStatus.NOT_DOWNLOADED
+                )
+            },
+            supportingContent = {
+                Text(
+                    text = size,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            },
+            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+            content = {
+                Text(
+                    text = name,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                )
+            },
+        )
+    }
+}
+
+@Composable
+private fun FileStatusIcon(
+    status: DownloadStatus,
+    modifier: Modifier = Modifier,
+) {
+    AnimatedContent(
+        targetState = status,
+        modifier = modifier.size(24.dp),
+        transitionSpec = {
+            fadeIn(
+                animationSpec = tween(200)
+            ) togetherWith fadeOut(
+                animationSpec = tween(150)
+            )
+        },
+        label = "file_download_status"
+    ) { state ->
+        when (state) {
+            DownloadStatus.NOT_DOWNLOADED -> {
                 Icon(
                     imageVector = Icons.Default.Download,
-                    contentDescription = "Download",
+                    contentDescription = "Скачать",
                     tint = MaterialTheme.colorScheme.primary
                 )
             }
-        )
+
+            DownloadStatus.PENDING -> {
+                Icon(
+                    imageVector = Icons.Default.Schedule,
+                    contentDescription = "Ожидает загрузки",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            DownloadStatus.DOWNLOADING -> {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            DownloadStatus.COMPLETED -> {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = "Загружено",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            DownloadStatus.FAILED -> {
+                Icon(
+                    imageVector = Icons.Default.ErrorOutline,
+                    contentDescription = "Ошибка загрузки",
+                    tint = MaterialTheme.colorScheme.error
+                )
+            }
+        }
     }
 }
 
@@ -161,6 +237,7 @@ fun HomeworkCard(
     descriptionBlocks: List<HtmlBlock>,
     attachedFiles: List<FeedItemUi.File>,
     onFileClick: (String, String?) -> Unit,
+    files: ImmutableMap<String, DownloadStatus>,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -243,7 +320,8 @@ fun HomeworkCard(
                                 filename = file.filename,
                                 version = file.version,
                                 onClick = onFileClick,
-                                containerColor = Color.Transparent
+                                containerColor = Color.Transparent,
+                                files = files
                             )
                             if (index < attachedFiles.lastIndex) {
                                 HorizontalDivider(
@@ -435,7 +513,6 @@ fun HtmlContentRenderer(
                                         fontWeight = FontWeight.Medium
                                     )
 //                                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-//                                        // "Кнопочки" как в mac/IDE для декорации
 //                                        Box(
 //                                            modifier = Modifier
 //                                                .size(8.dp)

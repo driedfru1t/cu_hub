@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.cuhub.android.library)
     alias(libs.plugins.cuhub.dagger)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -9,7 +10,6 @@ android {
 
 dependencies {
     implementation(projects.core.lms.data)
-    implementation(projects.core.storage)
     implementation(projects.core.sync)
     implementation(projects.core.network)
     implementation(projects.core.common)
@@ -18,6 +18,8 @@ dependencies {
 
     implementation(platform(libs.ktor.bom))
     implementation(libs.ktor.client.core)
+
+    implementation(libs.kotlinx.serialization.json)
 
     implementation(platform(libs.arrow.bom))
     implementation(libs.arrow.core)

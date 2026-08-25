@@ -15,9 +15,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Archive
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -36,8 +33,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -57,7 +54,7 @@ import com.nikol.lms_impl.mvi.state.CoursesState
 import com.nikol.lms_impl.viewModels.CoursesRouter
 import com.nikol.lms_impl.viewModels.CoursesViewModel
 import com.nikol.ui.CourseCard
-import com.nikol.ui.CourseSummaryListPreviewProvider
+import com.nikol.ui.prewiewData.CourseSummaryListPreviewProvider
 import com.nikol.viewmodel.daggerViewModel
 import kotlinx.coroutines.launch
 
@@ -85,7 +82,7 @@ fun CoursesScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun CoursesScreen(
+private fun CoursesScreen(
     state: CoursesState<CourseSummary>,
     onIntent: (CoursesIntent) -> Unit
 ) {
@@ -102,7 +99,7 @@ internal fun CoursesScreen(
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
             Column(modifier = Modifier.background(MaterialTheme.colorScheme.surface)) {
                 TopAppBar(
@@ -115,8 +112,14 @@ internal fun CoursesScreen(
                     actions = {
                         IconButton(onClick = { onIntent(CoursesIntent.ClickToArchive) }) {
                             Icon(
-                                imageVector = Icons.Rounded.Archive,
-                                contentDescription = null
+                                painter = painterResource(R.drawable.archive),
+                                contentDescription = "архив"
+                            )
+                        }
+                        IconButton(onClick = { onIntent(CoursesIntent.ClickToArchive) }) {
+                            Icon(
+                                painter = painterResource(R.drawable.notifications),
+                                contentDescription = "архив"
                             )
                         }
                     },

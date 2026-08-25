@@ -13,8 +13,6 @@ import androidx.compose.material3.FloatingToolbarDefaults
 import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,9 +24,9 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
-import com.example.nav3recipes.bottomsheet.BottomSheetSceneStrategy
-import com.nikol.lms_api.ArchiveCourses
+import com.nikol.navigation.BottomSheetSceneStrategy
 import com.nikol.lms_api.Courses
+import com.nikol.lms_api.Tasks
 import com.nikol.lms_impl.nav.lms
 import com.nikol.navigation.Main
 import com.nikol.navigation.Navigator
@@ -43,19 +41,20 @@ data class NavBarItem(
 )
 
 @Serializable
-data object RouteB : NavKey
-
-@Serializable
-data object RouteC : NavKey
+data object Settings : NavKey
 
 val TOP_LEVEL_ROUTES = mapOf(
     Courses to NavBarItem(icon = R.drawable.school),
-    Schedule to NavBarItem(R.drawable.science),
-    RouteB to NavBarItem(R.drawable.design_services)
+    Schedule to NavBarItem(R.drawable.today),
+    Tasks to NavBarItem(R.drawable.task),
+    Settings to NavBarItem(R.drawable.settings),
 )
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
-fun EntryProviderScope<NavKey>.mainGraph() {
+fun EntryProviderScope<NavKey>.mainGraph(
+    onBackRoot: () -> Unit,
+    navigateToRoot: (NavKey) -> Unit,
+) {
     entry<Main> {
         val navigationState = rememberNavigationState(Courses, TOP_LEVEL_ROUTES.keys)
         val navigator = remember { Navigator(navigationState) }
@@ -64,32 +63,13 @@ fun EntryProviderScope<NavKey>.mainGraph() {
         val entryProvider = entryProvider {
             lms(
                 onBack = { navigator.onBack() },
-                navigateTo = { navigator.navigate(it) }
+                onBackRoot = onBackRoot,
+                navigateTo = { navigator.navigate(it) },
+                navigateToRoot = navigateToRoot
             )
             schedule()
-            entry<RouteB> {
-                Scaffold { paddingValues ->
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("B")
-                    }
-                }
-            }
-            entry<RouteC> {
-                Scaffold { paddingValues ->
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("C")
-                    }
-                }
+            entry<Settings> {
+
             }
         }
 

@@ -24,8 +24,11 @@ dependencies {
 
     implementation(libs.jsoup)
 
+    implementation(libs.datastore.preferences)
+
     implementation(projects.core.network)
     implementation(projects.core.cache)
     implementation(projects.core.common)
+    implementation(projects.core.prefs)
     implementation(projects.core.lms.domain)
 }

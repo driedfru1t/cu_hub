@@ -13,6 +13,7 @@ dependencies {
     implementation(projects.core.calendar.data)
     implementation(projects.core.ui)
     implementation(projects.core.common)
+    implementation(projects.core.storage)
     implementation(projects.core.designsystem)
 
     implementation(libs.androidx.material3)

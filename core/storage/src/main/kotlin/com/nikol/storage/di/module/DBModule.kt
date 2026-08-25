@@ -4,8 +4,11 @@ import android.content.Context
 import androidx.room.Room
 import com.nikol.calendar.data.local.CalendarDao
 import com.nikol.calendar.data.local.CalendarEventDao
+import com.nikol.lms.backround.FileDAO
 import com.nikol.lms.data.local.dao.CourseOverviewDao
 import com.nikol.lms.data.local.dao.CoursesDao
+import com.nikol.lms.data.local.dao.LongreadDao
+import com.nikol.lms.data.local.dao.TaskSummaryDao
 import com.nikol.storage.db.AppDatabase
 import dagger.Module
 import dagger.Provides
@@ -47,4 +50,21 @@ internal class DBModule {
         return db.calendarDao()
     }
 
+    @Singleton
+    @Provides
+    fun provideFileDao(db: AppDatabase): FileDAO {
+        return db.fileDao()
+    }
+
+    @Singleton
+    @Provides
+    fun provideTaskSummaryDao(db: AppDatabase): TaskSummaryDao {
+        return db.taskSummaryDao()
+    }
+
+    @Singleton
+    @Provides
+    fun provideLongreadDao(db: AppDatabase): LongreadDao {
+        return db.longreadDao()
+    }
 }

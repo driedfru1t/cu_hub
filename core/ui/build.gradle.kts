@@ -20,4 +20,5 @@ dependencies {
     implementation(platform(libs.arrow.bom))
     implementation(libs.arrow.optics)
     ksp(libs.arrow.optics.ksp)
+    implementation(libs.androidx.material.icons.extended)
 }

@@ -37,6 +37,7 @@ import com.nikol.designsystem.theme.CUHubTheme
 import com.nikol.lms.domain.model.CourseCategory
 import com.nikol.lms.domain.model.CourseSummary
 import com.nikol.lms.domain.model.PublicationState
+import com.nikol.ui.prewiewData.CourseSummaryPreviewProvider
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -48,10 +49,8 @@ fun CourseCard(
 ) {
     val isArchived = courseSummary.state == PublicationState.ARCHIVED || courseSummary.isArchived
 
-    // Возвращаем твои фиксированные цвета для визуальной ассоциации (как папки в Google Drive)
     val baseColor = remember(courseSummary.category) { courseSummary.category.toGoogleIconColor() }
-    val iconBgColor = baseColor.copy(alpha = 0.15f) // Нежный фон в цвет категории
-    val iconTintColor = baseColor                   // Сочная иконка
+    val iconBgColor = baseColor.copy(alpha = 0.15f)
 
     val categoryName = remember(courseSummary.category) {
         courseSummary.category.name.lowercase().replace('_', ' ')
@@ -86,7 +85,7 @@ fun CourseCard(
                     Icon(
                         painter = painterResource(courseSummary.category.toIcon()),
                         contentDescription = null,
-                        tint = iconTintColor,
+                        tint = baseColor,
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -99,7 +98,7 @@ fun CourseCard(
                     Text(
                         text = categoryName,
                         style = MaterialTheme.typography.labelMedium,
-                        color = iconTintColor, // Твой цвет
+                        color = baseColor,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -119,7 +118,9 @@ fun CourseCard(
 
                 IconButton(
                     onClick = clickToMore,
-                    modifier = Modifier.padding(start = 4.dp).size(36.dp)
+                    modifier = Modifier
+                        .padding(start = 4.dp)
+                        .size(36.dp)
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.more_vert),
@@ -203,7 +204,6 @@ private fun CourseCategory.toIcon(): Int {
     }
 }
 
-// Оставили твои цвета для визуальной ассоциации!
 private fun CourseCategory.toGoogleIconColor(): Color = when (this) {
     CourseCategory.WITHOUT_CATEGORY -> Color(0xFF757575)
     CourseCategory.GENERAL -> Color(0xFF00796B)

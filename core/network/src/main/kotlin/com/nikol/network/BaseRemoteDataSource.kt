@@ -36,6 +36,8 @@ abstract class BaseRemoteDataSource(protected val json: Json) {
         }
     }
 
+
+
     // эта функйия вернет CancellationException
     protected suspend inline fun <reified T> safeApiCall(
         crossinline apiCall: suspend () -> HttpResponse

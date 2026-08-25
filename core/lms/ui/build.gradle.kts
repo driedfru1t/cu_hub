@@ -20,6 +20,7 @@ dependencies {
     implementation(libs.coil.network.ktor3)
 
     implementation(projects.core.lms.domain)
+    implementation(projects.core.lms.backroundWork)
     implementation(projects.core.ui)
     implementation(projects.core.network)
     implementation(projects.core.common)

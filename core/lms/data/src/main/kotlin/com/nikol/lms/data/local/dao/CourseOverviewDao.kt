@@ -5,7 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
-import com.nikol.lms.data.local.CourseOverviewWithThemes
+import com.nikol.lms.data.local.entity.CourseOverviewWithThemes
 import com.nikol.lms.data.local.entity.CourseOverviewEntity
 import com.nikol.lms.data.local.entity.CourseThemeEntity
 import com.nikol.lms.data.local.entity.ExerciseEntity
@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.Flow
 interface CourseOverviewDao {
 
     @Transaction
-    @Query("SELECT * FROM courses WHERE id = :courseId")
+    @Query("SELECT * FROM course WHERE id = :courseId")
     fun getCourseOverview(courseId: Int): Flow<CourseOverviewWithThemes?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

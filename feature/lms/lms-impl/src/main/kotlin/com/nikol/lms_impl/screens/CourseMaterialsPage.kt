@@ -158,7 +158,14 @@ fun CourseMaterialsPage(
                 items(items = state.value.materials.themes, key = { it.id }) { theme ->
                     ExpandableModuleCard(
                         theme = theme,
-                        onMaterialClick = { onIntent(CourseMaterialsIntent.OnMaterialClick(it)) }
+                        onMaterialClick = { p1, p2 ->
+                            onIntent(
+                                CourseMaterialsIntent.OnMaterialClick(
+                                    id = p1,
+                                    name = p2
+                                )
+                            )
+                        }
                     )
                 }
             }
@@ -273,7 +280,7 @@ fun DeadlineCard(
 }
 
 @Composable
-fun ExpandableModuleCard(theme: CourseTheme, onMaterialClick: (Int) -> Unit) {
+fun ExpandableModuleCard(theme: CourseTheme, onMaterialClick: (Int, String) -> Unit) {
     var isExpanded by rememberSaveable { mutableStateOf(false) }
     val rotationState by animateFloatAsState(
         targetValue = if (isExpanded) 180f else 0f,
@@ -376,19 +383,42 @@ fun ExpandableModuleCard(theme: CourseTheme, onMaterialClick: (Int) -> Unit) {
 }
 
 @Composable
-fun MaterialSubItemRow(longread: Longread, onMaterialClick: (Int) -> Unit) {
+fun MaterialSubItemRow(longread: Longread, onMaterialClick: (Int, String) -> Unit) {
     ListItem(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onMaterialClick(longread.id) },
-        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-        headlineContent = {
-            Text(
-                text = longread.name,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium
-            )
+            .clickable { onMaterialClick(longread.id, longread.name) },
+        leadingContent = {
+            val iconBgColor = if (longread.type == LongreadType.HANDOUT)
+                MaterialTheme.colorScheme.tertiaryContainer
+            else
+                MaterialTheme.colorScheme.secondaryContainer
+
+            val iconTintColor = if (longread.type == LongreadType.HANDOUT)
+                MaterialTheme.colorScheme.onTertiaryContainer
+            else
+                MaterialTheme.colorScheme.onSecondaryContainer
+
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(iconBgColor),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = when (longread.type) {
+                        LongreadType.COMMON -> Icons.AutoMirrored.Rounded.Article
+                        LongreadType.HANDOUT -> Icons.AutoMirrored.Rounded.Assignment
+                    },
+                    contentDescription = null,
+                    tint = iconTintColor,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
         },
+        trailingContent = null,
+        overlineContent = null,
         supportingContent = {
             val deadline = longread.exercises.firstOrNull()?.deadline
             if (deadline != null) {
@@ -424,34 +454,14 @@ fun MaterialSubItemRow(longread: Longread, onMaterialClick: (Int) -> Unit) {
                 }
             }
         },
-        leadingContent = {
-            val iconBgColor = if (longread.type == LongreadType.HANDOUT)
-                MaterialTheme.colorScheme.tertiaryContainer
-            else
-                MaterialTheme.colorScheme.secondaryContainer
-
-            val iconTintColor = if (longread.type == LongreadType.HANDOUT)
-                MaterialTheme.colorScheme.onTertiaryContainer
-            else
-                MaterialTheme.colorScheme.onSecondaryContainer
-
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(iconBgColor),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = when (longread.type) {
-                        LongreadType.COMMON -> Icons.AutoMirrored.Rounded.Article
-                        LongreadType.HANDOUT -> Icons.AutoMirrored.Rounded.Assignment
-                    },
-                    contentDescription = null,
-                    tint = iconTintColor,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-        }
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+        elevation = ListItemDefaults.elevation(ListItemDefaults.Elevation),
+        content = {
+            Text(
+                text = longread.name,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium
+            )
+        },
     )
 }

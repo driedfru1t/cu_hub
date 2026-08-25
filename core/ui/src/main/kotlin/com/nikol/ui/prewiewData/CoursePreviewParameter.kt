@@ -1,4 +1,4 @@
-package com.nikol.ui
+package com.nikol.ui.prewiewData
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.nikol.lms.domain.model.CourseCategory

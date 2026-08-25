@@ -11,10 +11,26 @@ enum class DownloadStatus {
     FAILED
 }
 
-@Entity(tableName = "course_files")
+@Entity(tableName = "files")
 data class FileEntity(
-    @PrimaryKey val id: String, // name_version
+    @PrimaryKey val id: String,
     val fileName: String,
-    val version: String,
+    val name: String,
+    val version: String?,
+    val size: Long,
     val status: DownloadStatus = DownloadStatus.NOT_DOWNLOADED,
+    val localUri: String? = null,
+    val mimeType: String? = null
 )
+
+fun formatFileName(originalName: String, version: String?): String {
+    val extension = originalName.substringAfterLast('.', "")
+    val baseName = originalName.substringBeforeLast('.')
+    return if (version.isNullOrBlank()) {
+        originalName
+    } else if (extension.isNotEmpty() && extension != originalName) {
+        "${baseName}_v${version}.${extension}"
+    } else {
+        "${originalName}_v${version}"
+    }
+}

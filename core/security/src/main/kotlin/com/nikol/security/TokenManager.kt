@@ -24,7 +24,6 @@ interface TokenManager {
     suspend fun clearTokens()
 }
 
-@Singleton
 class TokenManagerImpl @Inject constructor(
     private val keyStore: KeyStore,
     @param:TokenDataStore private val dataStore: DataStore<Preferences>,

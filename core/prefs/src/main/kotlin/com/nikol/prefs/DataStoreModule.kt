@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStoreFile
+import com.nikol.prefs.qualifers.LmsDataStore
 import com.nikol.prefs.qualifers.TokenDataStore
 import dagger.Module
 import dagger.Provides
@@ -19,6 +20,15 @@ class DataStoreModule {
     fun provideAuthDataStore(context: Context): DataStore<Preferences> {
         return PreferenceDataStoreFactory.create(
             produceFile = { context.preferencesDataStoreFile("token_prefs") }
+        )
+    }
+
+    @Provides
+    @Singleton
+    @LmsDataStore
+    fun provideLmsDataStore(context: Context): DataStore<Preferences> {
+        return PreferenceDataStoreFactory.create(
+            produceFile = { context.preferencesDataStoreFile("lms_prefs") }
         )
     }
 }

@@ -19,6 +19,7 @@ dependencies {
     implementation(projects.core.storage)
     implementation(projects.core.security)
     implementation(projects.core.lms.data)
+    implementation(projects.core.lms.backroundWork)
     implementation(projects.core.calendar.data)
     implementation(projects.core.prefs)
     implementation(projects.core.common)

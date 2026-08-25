@@ -7,5 +7,14 @@ import com.nikol.security.di.TokenModule
 import com.nikol.storage.di.module.StoragesModule
 import dagger.Module
 
-@Module(includes = [NetworkModule::class, StoragesModule::class, TokenModule::class, DataStoreModule::class, DispatcherModule::class])
+@Module(
+    includes = [
+        NetworkModule::class,
+        StoragesModule::class,
+        TokenModule::class,
+        DataStoreModule::class,
+        DispatcherModule::class,
+        WorkerModule::class
+    ]
+)
 class MainModule

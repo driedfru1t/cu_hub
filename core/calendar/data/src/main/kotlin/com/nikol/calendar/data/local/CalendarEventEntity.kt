@@ -35,7 +35,7 @@ data class CalendarEventEntity(
     // UNTIL из RRULE
     val recurrenceUntil: Instant?,
 
-    // Список отменённых и переопределённых дат (EXDATE + RECURRENCE-ID)
+    // список отменённых и переопределённых дат (EXDATE + RECURRENCE-ID)
     val exdates: List<Instant> = emptyList(),
     val overrides: List<OverrideEventDto> = emptyList(),
 

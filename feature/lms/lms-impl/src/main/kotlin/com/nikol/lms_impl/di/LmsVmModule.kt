@@ -7,12 +7,14 @@ import com.nikol.lms_impl.viewModels.courseDeatil.CourseDetailVM
 import com.nikol.lms_impl.viewModels.CoursesViewModel
 import com.nikol.lms_impl.viewModels.MaterialVM
 import com.nikol.lms_impl.viewModels.TaskDetailVM
+import com.nikol.lms_impl.viewModels.TasksVM
 import com.nikol.lms_impl.viewModels.courseDeatil.CourseGradesVM
 import com.nikol.lms_impl.viewModels.courseDeatil.CourseMaterialsVM
 import com.nikol.viewmodel.DaggerViewModel
 import com.nikol.viewmodel.ViewModelKey
 import dagger.Binds
 import dagger.Module
+import dagger.Provides
 import dagger.multibindings.IntoMap
 
 @Module
@@ -60,8 +62,9 @@ interface TaskVMModule {
 
     @Binds
     @IntoMap
-    @ViewModelKey(TaskDetailVM::class)
-    fun bindTaskDetailViewModel(taskDetailVM: TaskDetailVM): ViewModel
+    @ViewModelKey(TasksVM::class)
+    fun bindTaskDetailViewModel(tasksVM: TasksVM): ViewModel
+
 }
 
 @Module
