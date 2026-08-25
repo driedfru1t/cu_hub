@@ -9,7 +9,7 @@ import com.nikol.lms.domain.model.CourseSkillLevel
 import com.nikol.lms.domain.model.LongreadType
 import com.nikol.lms.domain.model.PublicationState
 
-@Entity(tableName = "courses")
+@Entity(tableName = "course")
 data class CourseOverviewEntity(
     @PrimaryKey val id: Int,
     val name: String,
@@ -28,7 +28,7 @@ data class CourseSettingsEmbedded(
 )
 
 @Entity(
-    tableName = "course_themes",
+    tableName = "themes",
     foreignKeys = [
         ForeignKey(
             entity = CourseOverviewEntity::class,
@@ -69,6 +69,12 @@ data class LongreadEntity(
     val state: PublicationState,
     val publishDate: String?,
     val publishedAt: String?
+)
+
+data class Longread(
+    val id: Int,
+    val themeId: Int,
+    val name: String
 )
 
 @Entity(

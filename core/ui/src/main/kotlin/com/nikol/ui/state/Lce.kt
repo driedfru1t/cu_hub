@@ -7,9 +7,8 @@ import direct.direct_core.DirectState
 @Immutable
 @optics
 sealed interface Lce<out E, out A> : DirectState {
-    companion object
 
-    object Loading : Lce<Nothing, Nothing>
+    data object Loading : Lce<Nothing, Nothing>
 
     @optics
     data class Content<A>(val value: A) : Lce<Nothing, A> {
@@ -20,4 +19,6 @@ sealed interface Lce<out E, out A> : DirectState {
     data class Failure<E>(val error: E) : Lce<E, Nothing> {
         companion object
     }
+
+    companion object
 }

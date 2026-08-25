@@ -1,12 +1,19 @@
 package com.nikol.lms_impl.nav
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.metadata
-import com.example.nav3recipes.bottomsheet.BottomSheetSceneStrategy
+import androidx.navigation3.ui.NavDisplay
+import com.nikol.navigation.BottomSheetSceneStrategy
 import com.nikol.di.ext.rememberComponent
 import com.nikol.lms_api.ArchiveCourses
 import com.nikol.lms_api.Course
@@ -25,7 +32,8 @@ import com.nikol.viewmodel.LocalViewModelFactory
 @OptIn(ExperimentalMaterial3Api::class)
 fun EntryProviderScope<NavKey>.courses(
     onBack: () -> Unit,
-    navigateTo: (NavKey) -> Unit
+    navigateTo: (NavKey) -> Unit,
+    navigateToRoot: (NavKey) -> Unit,
 ) {
     entry<Courses> {
         val lmsComponent = rememberComponent { CoursesComponentViewModel(it) }
@@ -36,26 +44,25 @@ fun EntryProviderScope<NavKey>.courses(
         }
     }
     entry<Course>(
-        //потом вернуть на кастом
         metadata = metadata {
-//            put(NavDisplay.TransitionKey) {
-//                slideInVertically(
-//                    initialOffsetY = { it },
-//                    animationSpec = tween(400)
-//                ) togetherWith fadeOut(tween(300))
-//            }
-//            put(NavDisplay.PopTransitionKey) {
-//                fadeIn(tween(300)) togetherWith slideOutVertically(
-//                    targetOffsetY = { it },
-//                    animationSpec = tween(400)
-//                )
-//            }
-//            put(NavDisplay.PredictivePopTransitionKey) {
-//                fadeIn(tween(300)) togetherWith slideOutVertically(
-//                    targetOffsetY = { it },
-//                    animationSpec = tween(400)
-//                )
-//            }
+            put(NavDisplay.TransitionKey) {
+                slideInVertically(
+                    initialOffsetY = { it },
+                    animationSpec = tween(400)
+                ) togetherWith fadeOut(tween(300))
+            }
+            put(NavDisplay.PopTransitionKey) {
+                fadeIn(tween(300)) togetherWith slideOutVertically(
+                    targetOffsetY = { it },
+                    animationSpec = tween(400)
+                )
+            }
+            put(NavDisplay.PredictivePopTransitionKey) {
+                fadeIn(tween(300)) togetherWith slideOutVertically(
+                    targetOffsetY = { it },
+                    animationSpec = tween(400)
+                )
+            }
         }
     ) { course ->
         val lmsComponent = rememberComponent { CourseDetailComponentVM(it, course.id) }
@@ -65,7 +72,8 @@ fun EntryProviderScope<NavKey>.courses(
             CourseDetailScreen(
                 name = course.name,
                 onBack = onBack,
-                navigateTo = navigateTo
+                navigateTo = navigateTo,
+                navigateToRoot = navigateToRoot
             )
         }
     }

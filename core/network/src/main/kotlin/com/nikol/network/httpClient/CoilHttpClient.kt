@@ -16,9 +16,9 @@ fun provideCoilHttpClient(okHttpClient: OkHttpClient, json: Json) = HttpClient(O
     engine {
         preconfigured = okHttpClient
     }
-    install(plugin = ContentNegotiation) {
-        json(json = json)
-    }
+//    install(plugin = ContentNegotiation) {
+//        json(json = json)
+//    }
 
     //install(CoilImageLoggerPlugin)
     install(Logging) {

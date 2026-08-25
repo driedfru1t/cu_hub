@@ -14,6 +14,7 @@ import com.nikol.lms.domain.useCase.GetCourseTasksPerformanceUseCase
 import com.nikol.lms.domain.useCase.GetCourseUseCase
 import com.nikol.lms.domain.useCase.GetCoursesUseCase
 import com.nikol.lms.domain.useCase.GetTaskDetails
+import com.nikol.lms.domain.useCase.GetTasksUseCase
 import com.nikol.lms.domain.useCase.GetThemeMaterialsUseCase
 import dagger.Module
 import dagger.Provides
@@ -106,6 +107,15 @@ class LmsUseCaseModule {
         @Dispatcher(CuHubDispatcher.IO) coroutineDispatcher: CoroutineDispatcher
     ): GetArchiveCourses {
         return GetArchiveCourses(coroutineDispatcher, repo)
+    }
+
+    @Provides
+    @LmsScope
+    fun provideGetTaskUseCase(
+        repo: TaskRepository,
+        @Dispatcher(CuHubDispatcher.IO) coroutineDispatcher: CoroutineDispatcher
+    ): GetTasksUseCase {
+        return GetTasksUseCase(coroutineDispatcher, repo)
     }
 
 }

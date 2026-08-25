@@ -1,20 +1,15 @@
-package com.example.nav3recipes.bottomsheet
+package com.nikol.navigation
 
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalBottomSheetProperties
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberBottomSheetState
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.rememberLifecycleOwner
 import androidx.navigation3.runtime.NavEntry
@@ -51,8 +46,8 @@ data class BottomSheetScene<T : Any>(
         val lifecycleOwner = rememberLifecycleOwner()
 
         val sheetState = rememberBottomSheetState(
-            initialValue = SheetValue.Hidden, // Начинаем скрытыми, как просит система
-            enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded) // Пропускаем PartiallyExpanded
+            initialValue = SheetValue.Hidden,
+            enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
         )
 
         ModalBottomSheet(

@@ -12,6 +12,7 @@ android {
 dependencies {
     implementation(projects.core.lms.data)
     implementation(projects.core.lms.domain)
+    implementation(projects.core.lms.backroundWork)
     implementation(projects.core.calendar.data)
     implementation(projects.core.calendar.domain)
 

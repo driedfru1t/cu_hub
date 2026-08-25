@@ -4,9 +4,10 @@ import android.content.Context
 import androidx.work.ListenableWorker
 import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
-import dagger.internal.Provider
+import javax.inject.Inject
+import javax.inject.Provider
 
-class AppWorkerFactory (
+class AppWorkerFactory @Inject constructor(
     private val workerFactories: Map<Class<out ListenableWorker>, @JvmSuppressWildcards Provider<ChildWorkerFactory>>
 ) : WorkerFactory() {
 

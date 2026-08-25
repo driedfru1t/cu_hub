@@ -29,5 +29,14 @@ data class CourseInfo(
 
 @Serializable
 data class ThemeMaterial(
+    val id: Int,
+    val name: String
+) : NavKey
+
+@Serializable
+data object Tasks : NavKey
+
+@Serializable
+data class TaskDetail(
     val id: Int
 ) : NavKey

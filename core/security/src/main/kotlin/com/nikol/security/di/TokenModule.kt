@@ -11,6 +11,7 @@ import javax.inject.Singleton
 @Module
 interface TokenModule {
     @Binds
+    @Singleton
     fun bindTokenManager(tokenManagerImpl: TokenManagerImpl): TokenManager
 
     companion object {

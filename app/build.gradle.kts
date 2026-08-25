@@ -87,18 +87,22 @@ dependencies {
 
     implementation(libs.work.runtime.ktx)
 
+    implementation(libs.androidx.material.icons.extended)
+
     implementation(projects.core.network)
     implementation(projects.core.di)
     implementation(projects.core.storage)
     implementation(projects.core.security)
     implementation(projects.core.lms.data)
     implementation(projects.core.lms.domain)
+    implementation(projects.core.lms.backroundWork)
     implementation(projects.core.calendar.data)
     implementation(projects.core.calendar.domain)
     implementation(projects.core.prefs)
     implementation(projects.core.designsystem)
     implementation(projects.core.common)
     implementation(projects.core.ui)
+    implementation(projects.core.sync)
 
     implementation(projects.feature.auth.authApi)
     implementation(projects.feature.auth.authImpl)

@@ -11,10 +11,13 @@ dependencies {
     implementation(projects.feature.lms.lmsApi)
     implementation(projects.core.lms.domain)
     implementation(projects.core.lms.data)
+    implementation(projects.core.lms.backroundWork)
     implementation(projects.core.lms.ui)
     implementation(projects.core.ui)
     implementation(projects.core.common)
+    implementation(projects.core.storage)
     implementation(projects.core.designsystem)
+    implementation(projects.core.prefs)
 
     implementation(libs.androidx.material3)
     implementation(libs.androidx.compose.material3)
@@ -33,6 +36,8 @@ dependencies {
     implementation(libs.ktor.client.core)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.immutable.collections)
+
+    implementation(libs.datastore.preferences)
 
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mokk)

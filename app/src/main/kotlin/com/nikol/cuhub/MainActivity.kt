@@ -29,6 +29,7 @@ import com.nikol.cuhub.nav.mainGraph
 import com.nikol.designsystem.theme.CUHubTheme
 import com.nikol.di.ext.LocalAppDep
 import com.nikol.lms_api.Courses
+import com.nikol.lms_impl.nav.material
 import com.nikol.navigation.Main
 
 class MainActivity : AppCompatActivity() {
@@ -94,7 +95,11 @@ class MainActivity : AppCompatActivity() {
                                     add(Courses)
                                 }
                             }
-                            mainGraph()
+                            mainGraph(
+                                onBackRoot = { backStack.removeLastOrNull() },
+                                navigateToRoot = { backStack.add(it) }
+                            )
+                            material()
                         }
                     )
                 }

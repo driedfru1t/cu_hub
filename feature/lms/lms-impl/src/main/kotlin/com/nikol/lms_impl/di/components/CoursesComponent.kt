@@ -1,7 +1,13 @@
-package com.nikol.lms_impl.di
+package com.nikol.lms_impl.di.components
 
 import com.nikol.di.dep.LocalLmsDep
 import com.nikol.di.dep.NetworkCuDep
+import com.nikol.lms_impl.di.CourseDetailVMModule
+import com.nikol.lms_impl.di.CoursesViewModelModule
+import com.nikol.lms_impl.di.FactoryVMModule
+import com.nikol.lms_impl.di.LmsDataModule
+import com.nikol.lms_impl.di.LmsScope
+import com.nikol.lms_impl.di.LmsUseCaseModule
 import com.nikol.viewmodel.FeatureComponent
 import dagger.BindsInstance
 import dagger.Component

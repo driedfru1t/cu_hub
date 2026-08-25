@@ -18,8 +18,6 @@ import com.nikol.viewmodel.daggerViewModel
 fun StartAuthScreen(
     onCuAuth: () -> Unit
 ) {
-    val appLocales = AppCompatDelegate.getApplicationLocales()
-    val currentLocaleTag = appLocales.get(0)?.toLanguageTag() ?: "en"
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -30,15 +28,6 @@ fun StartAuthScreen(
             onClick = onCuAuth
         ) {
             Text("Вход в ЦУ")
-        }
-        Button(
-            onClick = {
-                val newLanguageTag = if (currentLocaleTag == "en") "ru" else "en"
-                val localeList = LocaleListCompat.forLanguageTags(newLanguageTag)
-                AppCompatDelegate.setApplicationLocales(localeList)
-            }
-        ) {
-            Text("Поменять язык")
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.nikol.lms_impl.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -68,12 +69,13 @@ fun CourseDetailScreen(
     name: String,
     onBack: () -> Unit,
     navigateTo: (NavKey) -> Unit,
+    navigateToRoot: (NavKey) -> Unit
 ) {
     val viewModel = daggerViewModel<CourseDetailVM, CourseDetailRouter> {
         object : CourseDetailRouter {
             override fun onBack() = onBack()
             override fun onInfo(time: String?, sillabus: String?) =
-                navigateTo(CourseInfo(time, sillabus))
+                navigateTo(CourseInfo(sillabus, time))
         }
     }
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -81,7 +83,7 @@ fun CourseDetailScreen(
         state = state,
         name = name,
         onIntent = viewModel::setIntent,
-        onMaterialDetail = navigateTo
+        onMaterialDetail = navigateToRoot
     )
 }
 
@@ -96,8 +98,8 @@ private fun CourseDetailScreen(
     val coroutineScope = rememberCoroutineScope()
 
     val materialsVM = daggerViewModel<CourseMaterialsVM, CourseMaterialsR> {
-        CourseMaterialsR {
-            onMaterialDetail(ThemeMaterial(it))
+        CourseMaterialsR { p1, p2 ->
+            onMaterialDetail(ThemeMaterial(p1, p2))
         }
     }
     val gradesVM = daggerViewModel<CourseGradesVM, Router> {
@@ -156,27 +158,22 @@ private fun CourseDetailScreen(
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        contentColor = MaterialTheme.colorScheme.surface,
         topBar = {
             Surface(
-                color = MaterialTheme.colorScheme.background,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column {
                     TopAppBar(
                         title = {
-                            val collapsedFraction = scrollBehavior.state.collapsedFraction
-                            // Короткий заголовок (Свернутый)
                             Text(
                                 text = name,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                                 style = MaterialTheme.typography.titleMedium,
-                                // Заменяем обычную альфу на graphicsLayer для плавной анимации
                                 modifier = Modifier.graphicsLayer {
                                     val collapsedFraction = scrollBehavior.state.collapsedFraction
-                                    // Появляется только когда скролл перешел экватор (от 0.5 до 1.0)
                                     alpha = ((collapsedFraction - 0.5f) * 2f).coerceIn(0f, 1f)
-                                    // Выезжает плавно снизу вверх (от +24dp к 0)
                                     translationY = (1f - collapsedFraction) * 24.dp.toPx()
                                 }
                             )
@@ -204,8 +201,8 @@ private fun CourseDetailScreen(
                             }
                         },
                         colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = Color.Transparent,
-                            scrolledContainerColor = Color.Transparent
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            scrolledContainerColor = MaterialTheme.colorScheme.surface
                         )
                     )
 
@@ -247,6 +244,7 @@ private fun CourseDetailScreen(
 
                     PrimaryTabRow(
                         selectedTabIndex = pagerState.currentPage,
+                        containerColor = MaterialTheme.colorScheme.surface,
                         divider = {}
                     ) {
                         Tab(
@@ -268,30 +266,35 @@ private fun CourseDetailScreen(
             }
         },
     ) { paddingValues ->
-        HorizontalPager(
-            state = pagerState,
+        Surface(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = paddingValues.calculateTopPadding())
-        ) { page ->
-            when (page) {
-                0 -> {
-                    CourseMaterialsPage(
-                        state = materialsState,
-                        listState = materialsListState,
-                        paddingValues = paddingValues,
-                        onIntent = materialsVM::setIntent
-                    )
-                }
+                .padding(top = paddingValues.calculateTopPadding()),
+            color = MaterialTheme.colorScheme.surface
+        ) {
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize()
+            ) { page ->
+                when (page) {
+                    0 -> {
+                        CourseMaterialsPage(
+                            state = materialsState,
+                            listState = materialsListState,
+                            paddingValues = paddingValues,
+                            onIntent = materialsVM::setIntent
+                        )
+                    }
 
-                1 -> {
-                    val gradesState by gradesVM.state.collectAsStateWithLifecycle()
-                    CourseGradesPage(
-                        state = gradesState,
-                        listState = gradesListState,
-                        paddingValues = paddingValues,
-                        onIntent = gradesVM::setIntent
-                    )
+                    1 -> {
+                        val gradesState by gradesVM.state.collectAsStateWithLifecycle()
+                        CourseGradesPage(
+                            state = gradesState,
+                            listState = gradesListState,
+                            paddingValues = paddingValues,
+                            onIntent = gradesVM::setIntent
+                        )
+                    }
                 }
             }
         }

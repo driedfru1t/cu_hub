@@ -20,9 +20,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -30,10 +32,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.nikol.di.ext.rememberComponent
+import com.nikol.lms.backround.openDownloadedFile
+import com.nikol.lms.backround.startSingleFileWork
 import com.nikol.lms.ui.RenderHtmlCompose
 import com.nikol.lms_api.ThemeMaterial
+import com.nikol.lms_impl.mvi.intent.ThemeMaterialIntent
 import com.nikol.lms_impl.mvi.state.ThemeMaterialState
 import com.nikol.lms_impl.viewModels.MaterialVM
+import com.nikol.lms_impl.viewModels.ThemeMaterialEffect
 import com.nikol.lms_impl.viewModels.components.MaterialComponentVM
 import com.nikol.viewmodel.LocalViewModelFactory
 
@@ -42,10 +48,21 @@ fun EntryProviderScope<NavKey>.material() {
         val materialComponent = rememberComponent { MaterialComponentVM(it, material.id) }
         CompositionLocalProvider(LocalViewModelFactory provides materialComponent.viewModelFactory()) {
             val vm = viewModel<MaterialVM>(factory = LocalViewModelFactory.current)
+            val context = LocalContext.current
+            LaunchedEffect(vm) {
+                vm.effect.collect { effect ->
+                    when (effect) {
+                        ThemeMaterialEffect.StartWorkManager -> startSingleFileWork(context)
+                        is ThemeMaterialEffect.OpenFile -> openDownloadedFile(context, effect.uri, effect.mimeType)
+                    }
+                }
+            }
             val state by vm.state.collectAsStateWithLifecycle()
 
             Box(
-                modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background),
                 contentAlignment = Alignment.Center
             ) {
                 when (val currentState = state) {
@@ -96,7 +113,9 @@ fun EntryProviderScope<NavKey>.material() {
                             )
                         } else {
                             LazyColumn(
-                                modifier = Modifier.fillMaxSize().statusBarsPadding(),
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .statusBarsPadding(),
                                 contentPadding = PaddingValues(
                                     start = 16.dp,
                                     end = 16.dp,
@@ -110,8 +129,15 @@ fun EntryProviderScope<NavKey>.material() {
                                     key = { it.id }
                                 ) { item ->
                                     item.RenderHtmlCompose(
-
-                                    )
+                                        files = currentState.files
+                                    ) { filename, version ->
+                                        vm.setIntent(
+                                            ThemeMaterialIntent.ClickToFile(
+                                                filename,
+                                                version
+                                            )
+                                        )
+                                    }
                                 }
                             }
                         }

@@ -1,6 +1,7 @@
 package com.nikol.lms.domain.model
 
 import com.nikol.lms.domain.common.UnstableLmsApi
+import kotlinx.serialization.SerialName
 import java.time.Duration
 import java.time.Instant
 
@@ -9,26 +10,42 @@ enum class TaskType {
 }
 
 enum class TaskState {
-    BACKLOG, IN_PROGRESS, SUBMITTED, REVIEW, EVALUATED, FAILED
+    BACKLOG, IN_PROGRESS, SUBMITTED, REVIEW, EVALUATED, FAILED, REWORKING
 }
 
 enum class TaskScoreSkillLevel {
     NONE, BASIC, INTERMEDIATE, ADVANCED
 }
-
-// [!] Спецификация GET /micro-lms/tasks/student отсутствует в OpenAPI.
-// Это облегченная модель задачи для списков и канбан-доски.
-// Поля определены гипотетически на основе общих полей задач и нужд UI.
-@UnstableLmsApi
 data class TaskSummary(
     val id: Int,
-    val type: TaskType,
     val state: TaskState,
     val score: Double?,
+    val scoreSkillLevel: TaskScoreSkillLevel?,
+    val isLateDaysEnabled: Boolean,
+    val extraScore: Double?,
+    val createdAt: Instant,
+    val startedAt: Instant?,
+    val submitAt: Instant?,
+    val rejectAt: Instant?,
+    val evaluateAt: Instant?,
     val deadline: Instant,
+    val lateDays: Int?,
+    val exercise: ExerciseTaskSummary,
+    val course: TaskCourse,
+    val theme: TaskCourseTheme,
+    val longread: TaskLongread,
+    val reviewer: TaskReviewer?,
+    val quizSessionId: Int?,
+)
+
+data class ExerciseTaskSummary(
+    val id: Int,
     val name: String,
-    val courseName: String,
-    val isLateDaysEnabled: Boolean
+    val type: TaskType,
+    val maxScore: Double,
+    val startDate: Instant,
+    val deadline: Instant,
+    val activity: TaskExerciseActivity
 )
 
 data class TaskExerciseActivity(
@@ -109,7 +126,6 @@ data class TaskScoresItem(
     val score: Double?
 )
 
-// На основе TaskByIdResponse из OpenAPI
 data class TaskDetails(
     val id: Int,
     val type: TaskType,

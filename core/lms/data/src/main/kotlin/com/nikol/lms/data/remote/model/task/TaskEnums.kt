@@ -7,6 +7,7 @@ import kotlinx.serialization.SerialName
 enum class TaskTypeDto {
     @SerialName("coding")
     CODING,
+
     @SerialName("questions")
     QUESTIONS
 }
@@ -15,26 +16,37 @@ enum class TaskTypeDto {
 enum class TaskStateDto {
     @SerialName("backlog")
     BACKLOG,
+
     @SerialName("inProgress")
     IN_PROGRESS,
+
     @SerialName("submitted")
     SUBMITTED,
+
     @SerialName("review")
     REVIEW,
+
     @SerialName("evaluated")
     EVALUATED,
+
     @SerialName("failed")
-    FAILED
+    FAILED,
+
+    @SerialName("reworking")
+    REWORKING
 }
 
 @Serializable
 enum class TaskScoreSkillLevelDto {
     @SerialName("none")
     NONE,
+
     @SerialName("basic")
     BASIC,
+
     @SerialName("intermediate")
     INTERMEDIATE,
+
     @SerialName("advanced")
     ADVANCED
 }

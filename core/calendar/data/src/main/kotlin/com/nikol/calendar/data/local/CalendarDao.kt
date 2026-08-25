@@ -10,7 +10,7 @@ interface CalendarDao {
     @Query(
         """
         SELECT *
-        FROM calendarentity
+        FROM calendar_entity
     """
     )
     suspend fun getAll(): List<CalendarEntity>
@@ -18,7 +18,7 @@ interface CalendarDao {
     @Query(
         """
         SELECT *
-        FROM calendarentity
+        FROM calendar_entity
         WHERE calendarHref = :href
     """
     )
@@ -32,12 +32,12 @@ interface CalendarDao {
 
     @Query(
         """
-        DELETE FROM calendarentity
+        DELETE FROM calendar_entity
         WHERE calendarHref = :href
     """
     )
     suspend fun deleteByHref(href: String)
 
-    @Query("DELETE FROM calendarentity")
+    @Query("DELETE FROM calendar_entity")
     suspend fun clear()
 }

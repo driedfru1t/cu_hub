@@ -1,8 +1,8 @@
 package com.nikol.lms.data.mapper
 
-import com.nikol.lms.data.local.CourseOverviewWithThemes
-import com.nikol.lms.data.local.LongreadWithExercises
-import com.nikol.lms.data.local.ThemeWithLongreads
+import com.nikol.lms.data.local.entity.CourseOverviewWithThemes
+import com.nikol.lms.data.local.entity.LongreadWithExercises
+import com.nikol.lms.data.local.entity.ThemeWithLongreads
 import com.nikol.lms.data.local.entity.ActivityDefinitionEmbedded
 import com.nikol.lms.data.local.entity.CourseOverviewEntity
 import com.nikol.lms.data.local.entity.CourseSettingsEmbedded
@@ -34,7 +34,6 @@ data class FlatCourseOverviewEntities(
     val exercises: List<ExerciseEntity>
 )
 
-// LOCAL ENTITY -> DOMAIN
 
 fun CourseSettingsEntity.toDomain(): CourseSettings = CourseSettings(
     skillLevel = runCatching { CourseSkillLevel.valueOf(skillLevel.uppercase()) }
@@ -113,7 +112,6 @@ fun CourseOverviewWithThemes.toDomain(): CourseOverview = CourseOverview(
     themes = themes.map { it.toDomain() }
 )
 
-// DTO -> LOCAL ENTITY
 
 fun CourseSettingsDTO.dtoToEntity(): CourseSettingsEntity = CourseSettingsEntity(
     skillLevel = skillLevel.name,
