@@ -204,3 +204,6 @@ class MyPlugin : Plugin<Project> {
 ```shell
 ./gradlew assembleDebug
 ```
+
+Перед сборкой нужно добавить в `local.properties` поле `YANDEX_CLIENT_ID` с идентификатором
+приложения в Яндекс ID. Без этого приложение не соберётся.
