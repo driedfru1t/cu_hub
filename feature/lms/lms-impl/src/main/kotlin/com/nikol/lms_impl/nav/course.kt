@@ -43,28 +43,7 @@ fun EntryProviderScope<NavKey>.courses(
             CoursesScreen(navigateTo)
         }
     }
-    entry<Course>(
-        metadata = metadata {
-            put(NavDisplay.TransitionKey) {
-                slideInVertically(
-                    initialOffsetY = { it },
-                    animationSpec = tween(400)
-                ) togetherWith fadeOut(tween(300))
-            }
-            put(NavDisplay.PopTransitionKey) {
-                fadeIn(tween(300)) togetherWith slideOutVertically(
-                    targetOffsetY = { it },
-                    animationSpec = tween(400)
-                )
-            }
-            put(NavDisplay.PredictivePopTransitionKey) {
-                fadeIn(tween(300)) togetherWith slideOutVertically(
-                    targetOffsetY = { it },
-                    animationSpec = tween(400)
-                )
-            }
-        }
-    ) { course ->
+    entry<Course> { course ->
         val lmsComponent = rememberComponent { CourseDetailComponentVM(it, course.id) }
         CompositionLocalProvider(
             LocalViewModelFactory provides lmsComponent.viewModelFactory()

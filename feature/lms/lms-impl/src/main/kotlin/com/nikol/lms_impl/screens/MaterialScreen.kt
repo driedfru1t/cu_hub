@@ -1,5 +1,6 @@
 package com.nikol.lms_impl.screens
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -9,7 +10,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -24,21 +28,32 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.filled.ErrorOutline
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.currentComposer
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -48,19 +63,26 @@ import com.nikol.lms.backround.startSingleFileWork
 import com.nikol.lms.data.local.entity.Longread
 import com.nikol.lms.ui.RenderHtmlCompose
 import com.nikol.lms_api.TaskDetail
+import com.nikol.lms_impl.mvi.intent.CourseArchiveIntent
 import com.nikol.lms_impl.mvi.intent.ThemeMaterialIntent
 import com.nikol.lms_impl.mvi.state.ThemeMaterialState
+import com.nikol.lms_impl.viewModels.MaterialRouter
 import com.nikol.lms_impl.viewModels.MaterialVM
 import com.nikol.lms_impl.viewModels.ThemeMaterialEffect
 import com.nikol.ui.state.Lce
 import com.nikol.viewmodel.LocalViewModelFactory
+import com.nikol.viewmodel.daggerViewModel
 
 @Composable
 fun MaterialScreen(
     onBack: () -> Unit,
-    onTask: (TaskDetail) -> Unit
+    onTask: (TaskDetail) -> Unit,
 ) {
-    val vm = viewModel<MaterialVM>(factory = LocalViewModelFactory.current)
+    val vm = daggerViewModel<MaterialVM, MaterialRouter> {
+        object : MaterialRouter {
+            override fun onBack() = onBack()
+        }
+    }
     val context = LocalContext.current
     LaunchedEffect(vm) {
         vm.effect.collect { effect ->
@@ -78,12 +100,12 @@ fun MaterialScreen(
     MaterialScreen(state, vm::setIntent)
 }
 
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun MaterialScreen(
     state: ThemeMaterialState,
     onIntent: (ThemeMaterialIntent) -> Unit,
 ) {
-
     val pagerState = rememberPagerState(
         initialPage = state.currentIndex,
         pageCount = { state.longi.size }
@@ -95,34 +117,68 @@ private fun MaterialScreen(
         }
     }
 
-    Box(
+    Scaffold(
         modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface)
-    ) {
+            .fillMaxSize(),
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        text = state.currentName,
+                        maxLines = 1,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                navigationIcon = {
+                    IconButton(
+                        onClick = {
+                            onIntent(ThemeMaterialIntent.OnBack)
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                            contentDescription = "Назад"
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surface
+                ),
+            )
+        },
+        bottomBar = {
+            Box(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                MaterialNavigationBottomBar(
+                    onPreviousClick = {
+                        onIntent(ThemeMaterialIntent.ClickLeft)
+                    },
+                    onNextClick = {
+                        onIntent(ThemeMaterialIntent.ClickRight)
+                    },
+                    isPreviousEnabled = state.currentIndex != 0,
+                    isNextEnabled = state.currentIndex != state.longi.lastIndex,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.surface
+    ) { paddingValues ->
+
         HorizontalPager(
             state = pagerState,
-            modifier = Modifier
-                .fillMaxSize()
-                .statusBarsPadding(),
-            contentPadding = PaddingValues(
-                bottom = 80.dp
-            ),
+            modifier = Modifier.fillMaxSize(),
             userScrollEnabled = false
-        ) { page ->
+        ) {
             MaterialPage(
                 state = state,
-                onIntent = onIntent
+                onIntent = onIntent,
+                contentPadding = paddingValues
             )
         }
-
-        MaterialNavigationBottomBar(
-            onPreviousClick = { onIntent(ThemeMaterialIntent.ClickLeft) },
-            onNextClick = { onIntent(ThemeMaterialIntent.ClickRight) },
-            modifier = Modifier.align(Alignment.BottomCenter),
-            isPreviousEnabled = state.currentIndex != 0,
-            isNextEnabled = state.currentIndex != state.longi.lastIndex
-        )
     }
 }
 
@@ -130,11 +186,15 @@ private fun MaterialScreen(
 private fun MaterialPage(
     state: ThemeMaterialState,
     onIntent: (ThemeMaterialIntent) -> Unit,
+    contentPadding: PaddingValues,
 ) {
     when (val materialState = state.material) {
+
         is Lce.Loading -> {
             Box(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(contentPadding),
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator(
@@ -146,7 +206,9 @@ private fun MaterialPage(
 
         is Lce.Failure -> {
             Box(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(contentPadding),
                 contentAlignment = Alignment.Center
             ) {
                 Column(
@@ -187,7 +249,9 @@ private fun MaterialPage(
 
             if (feedItems.isEmpty()) {
                 Box(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(contentPadding),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -197,13 +261,14 @@ private fun MaterialPage(
                     )
                 }
             } else {
+                val layoutDirection = LocalLayoutDirection.current
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(
-                        start = 16.dp,
-                        end = 16.dp,
-                        top = 16.dp,
-                        bottom = 96.dp
+                        start = 16.dp + contentPadding.calculateStartPadding(layoutDirection),
+                        end = 16.dp + contentPadding.calculateEndPadding(layoutDirection),
+                        top = contentPadding.calculateTopPadding(),
+                        bottom = contentPadding.calculateBottomPadding() + 8.dp
                     ),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {

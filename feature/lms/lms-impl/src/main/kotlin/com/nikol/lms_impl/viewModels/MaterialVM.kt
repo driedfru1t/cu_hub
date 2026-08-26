@@ -1,6 +1,7 @@
 package com.nikol.lms_impl.viewModels
 
 import arrow.optics.copy
+import arrow.optics.set
 import com.nikol.lms.backround.DownloadStatus
 import com.nikol.lms.backround.FileDAO
 import com.nikol.lms.backround.FileEntity
@@ -17,10 +18,13 @@ import com.nikol.lms_impl.mvi.intent.ThemeMaterialIntent
 import com.nikol.lms_impl.mvi.state.ThemeMaterialState
 import com.nikol.lms_impl.mvi.state.ThemeMaterialSuccess
 import com.nikol.lms_impl.mvi.state.currentIndex
+import com.nikol.lms_impl.mvi.state.currentName
 import com.nikol.lms_impl.mvi.state.longi
 import com.nikol.lms_impl.mvi.state.material
 import com.nikol.ui.state.Lce
 import com.nikol.ui.state.map
+import com.nikol.viewmodel.Router
+import com.nikol.viewmodel.RouterViewModel
 import direct.direct_core.DirectEffect
 import direct.direct_core.listenLatest
 import direct.direct_core.on
@@ -41,7 +45,11 @@ sealed interface ThemeMaterialEffect : DirectEffect {
     data class OpenFile(val uri: String, val mimeType: String?) : ThemeMaterialEffect
 }
 
-typealias ThemeMaterialsStore = DirectViewModel<ThemeMaterialIntent, ThemeMaterialState, ThemeMaterialEffect>
+interface MaterialRouter : Router {
+    fun onBack()
+}
+
+typealias ThemeMaterialsStore = RouterViewModel<ThemeMaterialIntent, ThemeMaterialState, ThemeMaterialEffect, MaterialRouter>
 
 class MaterialVM @Inject constructor(
     @param:MaterialId private val id: Int,
@@ -64,6 +72,7 @@ class MaterialVM @Inject constructor(
                 copy {
                     ThemeMaterialState.longi set longi.toImmutableList()
                     ThemeMaterialState.currentIndex set currentIndex
+                    ThemeMaterialState.currentName set longi[currentIndex].name
                 }
             }
         }
@@ -98,7 +107,10 @@ class MaterialVM @Inject constructor(
         on<ThemeMaterialIntent.ClickLeft> {
             setState {
                 if (currentIndex != 0) {
-                    copy { ThemeMaterialState.currentIndex set currentIndex - 1 }
+                    copy {
+                        ThemeMaterialState.currentIndex set currentIndex - 1
+                        ThemeMaterialState.currentName set longi[currentIndex - 1].name
+                    }
                 } else {
                     this
                 }
@@ -108,7 +120,10 @@ class MaterialVM @Inject constructor(
         on<ThemeMaterialIntent.ClickRight> {
             setState {
                 if (currentIndex != longi.lastIndex) {
-                    copy { ThemeMaterialState.currentIndex set currentIndex + 1 }
+                    copy {
+                        ThemeMaterialState.currentIndex set currentIndex + 1
+                        ThemeMaterialState.currentName set longi[currentIndex + 1].name
+                    }
                 } else {
                     this
                 }
@@ -168,6 +183,8 @@ class MaterialVM @Inject constructor(
             setState { copy { ThemeMaterialState.material set newState } }
             fileFlow.tryEmit(fileList.map { file -> file.id })
         }
+
+        onNavigate<ThemeMaterialIntent.OnBack>(true) { onBack() }
     }
 
     init {

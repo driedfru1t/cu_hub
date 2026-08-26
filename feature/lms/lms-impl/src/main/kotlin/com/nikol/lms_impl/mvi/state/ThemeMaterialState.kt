@@ -18,7 +18,8 @@ import kotlinx.collections.immutable.persistentListOf
 data class ThemeMaterialState(
     val material: Lce<CourseError, ThemeMaterialSuccess> = Lce.Loading,
     val longi: ImmutableList<Longread> = persistentListOf(),
-    val currentIndex: Int = 0
+    val currentIndex: Int = 0,
+    val currentName: String = ""
 ) : DirectState {
     companion object
 }

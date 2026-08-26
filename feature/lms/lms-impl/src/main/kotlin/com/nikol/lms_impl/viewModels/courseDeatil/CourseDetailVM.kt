@@ -52,7 +52,7 @@ class CourseDetailVM @Inject constructor() : CourseDetailStore() {
         on<CourseDetailIntent.SwitchTab> { intent ->
             setState { copy { CourseDetailState.currentTab.set(intent.tab) } }
         }
-        onNavigate<CourseDetailIntent.Back> { onBack() }
+        onNavigate<CourseDetailIntent.Back>(true) { onBack() }
         onNavigate<CourseDetailIntent.Info> { onInfo(it.timeChannelUrl, it.sillabusUrl) }
     }
 }
