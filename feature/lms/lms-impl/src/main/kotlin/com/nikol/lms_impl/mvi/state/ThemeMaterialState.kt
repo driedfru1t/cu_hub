@@ -11,22 +11,24 @@ import direct.direct_core.DirectState
 import kotlinx.collections.immutable.ImmutableCollection
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentListOf
 
 @Immutable
 @optics
-sealed interface ThemeMaterialState : DirectState {
-    data object Loading : ThemeMaterialState
+data class ThemeMaterialState(
+    val material: Lce<CourseError, ThemeMaterialSuccess> = Lce.Loading,
+    val longi: ImmutableList<Longread> = persistentListOf(),
+    val currentIndex: Int = 0,
+    val currentName: String = ""
+) : DirectState {
+    companion object
+}
 
-    data object Error : ThemeMaterialState
-
-    @Immutable
-    @optics
-    data class ThemeMaterialSuccess(
-        val list: ImmutableCollection<FeedItemUi>,
-        val files: ImmutableMap<String, DownloadStatus>
-    ) : ThemeMaterialState {
-        companion object
-    }
-
+@Immutable
+@optics
+data class ThemeMaterialSuccess(
+    val list: ImmutableList<FeedItemUi>,
+    val files: ImmutableMap<String, DownloadStatus>
+) {
     companion object
 }

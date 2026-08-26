@@ -22,3 +22,11 @@ sealed interface Lce<out E, out A> : DirectState {
 
     companion object
 }
+
+inline fun <E, A, B> Lce<E, A>.map(
+    transform: (A) -> B
+): Lce<E, B> = when (this) {
+    is Lce.Content -> Lce.Content(transform(value))
+    is Lce.Failure -> this
+    Lce.Loading -> Lce.Loading
+}

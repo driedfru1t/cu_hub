@@ -30,7 +30,8 @@ data class CourseInfo(
 @Serializable
 data class ThemeMaterial(
     val id: Int,
-    val name: String
+    val name: String,
+    val themeId: Int
 ) : NavKey
 
 @Serializable

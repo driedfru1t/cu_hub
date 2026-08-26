@@ -86,7 +86,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun TasksScreen(
     onBack: () -> Unit,
-    navigateTo: (NavKey) -> Unit
+    navigateTo: (TaskDetail) -> Unit
 ) {
     val vm = daggerViewModel<TasksVM, TasksRouter> {
         object : TasksRouter {

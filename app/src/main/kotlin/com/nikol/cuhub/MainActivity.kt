@@ -99,7 +99,10 @@ class MainActivity : AppCompatActivity() {
                                 onBackRoot = { backStack.removeLastOrNull() },
                                 navigateToRoot = { backStack.add(it) }
                             )
-                            material()
+                            material(
+                                onBack = { backStack.removeLastOrNull() },
+                                navigate = { backStack.add(it) }
+                            )
                         }
                     )
                 }

@@ -7,6 +7,6 @@ import com.nikol.lms.data.local.entity.Longread
 @Dao
 interface LongreadDao {
 
-    @Query("SELECT id, themeId, name FROM longreads")
-    suspend fun getShortLongread(): List<Longread>
+    @Query("SELECT id, themeId, name FROM longreads WHERE themeId = :themeId")
+    suspend fun getShortLongread(themeId: Int): List<Longread>
 }
