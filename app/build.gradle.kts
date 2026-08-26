@@ -1,3 +1,4 @@
+import com.android.build.api.dsl.Optimization
 import java.util.Properties
 import kotlin.apply
 
@@ -32,11 +33,9 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            optimization {
+                enable = true
+            }
         }
     }
     compileOptions {
@@ -110,4 +109,6 @@ dependencies {
     implementation(projects.feature.lms.lmsImpl)
     implementation(projects.feature.schedule.scheduleImpl)
     implementation(projects.feature.schedule.scheduleApi)
+    implementation(projects.feature.settings.settingsApi)
+    implementation(projects.feature.settings.settingsImpl)
 }

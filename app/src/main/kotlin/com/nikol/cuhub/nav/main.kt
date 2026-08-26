@@ -33,15 +33,13 @@ import com.nikol.navigation.Navigator
 import com.nikol.navigation.rememberNavigationState
 import com.nikol.schedule_api.Schedule
 import com.nikol.schedule_impl.nav.schedule
+import com.nikol.settings_api.Settings
 import com.nikol.ui.R
 import kotlinx.serialization.Serializable
 
 data class NavBarItem(
     val icon: Int,
 )
-
-@Serializable
-data object Settings : NavKey
 
 val TOP_LEVEL_ROUTES = mapOf(
     Courses to NavBarItem(icon = R.drawable.school),
