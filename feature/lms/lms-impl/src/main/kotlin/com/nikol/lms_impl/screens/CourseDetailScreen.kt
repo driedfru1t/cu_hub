@@ -98,8 +98,8 @@ private fun CourseDetailScreen(
     val coroutineScope = rememberCoroutineScope()
 
     val materialsVM = daggerViewModel<CourseMaterialsVM, CourseMaterialsR> {
-        CourseMaterialsR { p1, p2 ->
-            onMaterialDetail(ThemeMaterial(p1, p2))
+        CourseMaterialsR { p1, p2, p3 ->
+            onMaterialDetail(ThemeMaterial(p1, p2, p3))
         }
     }
     val gradesVM = daggerViewModel<CourseGradesVM, Router> {

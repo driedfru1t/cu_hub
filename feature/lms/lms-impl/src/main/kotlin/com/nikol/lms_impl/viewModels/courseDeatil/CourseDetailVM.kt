@@ -59,14 +59,15 @@ class CourseDetailVM @Inject constructor() : CourseDetailStore() {
 
 sealed interface CourseMaterialsIntent : DirectIntent {
     data object Load : CourseMaterialsIntent
-    data class OnMaterialClick(val id: Int, val name: String) : CourseMaterialsIntent
+    data class OnMaterialClick(val id: Int, val name: String, val themeId: Int) :
+        CourseMaterialsIntent
 }
 
 typealias CourseMaterialsState = Lce<CourseError, MaterialsData>
 typealias CourseMaterialsStore = RouterViewModel<CourseMaterialsIntent, CourseMaterialsState, DirectEffect, CourseMaterialsR>
 
 fun interface CourseMaterialsR : Router {
-    fun onMaterialDetail(id: Int, name: String)
+    fun onMaterialDetail(id: Int, name: String, themeid: Int)
 }
 
 class CourseMaterialsVM @Inject constructor(
@@ -100,7 +101,13 @@ class CourseMaterialsVM @Inject constructor(
             setState { newState }
         }
 
-        onNavigate<CourseMaterialsIntent.OnMaterialClick> { onMaterialDetail(it.id, it.name) }
+        onNavigate<CourseMaterialsIntent.OnMaterialClick> {
+            onMaterialDetail(
+                it.id,
+                it.name,
+                it.themeId
+            )
+        }
     }
 }
 

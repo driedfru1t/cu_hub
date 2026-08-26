@@ -158,11 +158,12 @@ fun CourseMaterialsPage(
                 items(items = state.value.materials.themes, key = { it.id }) { theme ->
                     ExpandableModuleCard(
                         theme = theme,
-                        onMaterialClick = { p1, p2 ->
+                        onMaterialClick = { p1, p2, p3 ->
                             onIntent(
                                 CourseMaterialsIntent.OnMaterialClick(
                                     id = p1,
-                                    name = p2
+                                    name = p2,
+                                    themeId = p3
                                 )
                             )
                         }
@@ -280,7 +281,7 @@ fun DeadlineCard(
 }
 
 @Composable
-fun ExpandableModuleCard(theme: CourseTheme, onMaterialClick: (Int, String) -> Unit) {
+fun ExpandableModuleCard(theme: CourseTheme, onMaterialClick: (Int, String, Int) -> Unit) {
     var isExpanded by rememberSaveable { mutableStateOf(false) }
     val rotationState by animateFloatAsState(
         targetValue = if (isExpanded) 180f else 0f,
@@ -374,7 +375,9 @@ fun ExpandableModuleCard(theme: CourseTheme, onMaterialClick: (Int, String) -> U
                         color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                     )
                     theme.longreads.forEach { longread ->
-                        MaterialSubItemRow(longread = longread, onMaterialClick = onMaterialClick)
+                        MaterialSubItemRow(
+                            longread = longread,
+                            onMaterialClick = { p1, p2 -> onMaterialClick(p1, p2, theme.id) })
                     }
                 }
             }

@@ -1,25 +1,39 @@
 package com.nikol.lms_impl.viewModels
 
+import arrow.optics.copy
 import com.nikol.lms.backround.DownloadStatus
 import com.nikol.lms.backround.FileDAO
 import com.nikol.lms.backround.FileEntity
 import com.nikol.lms.backround.formatFileName
+import com.nikol.lms.data.local.dao.LongreadDao
 import com.nikol.lms.domain.model.ExerciseCodingMaterial
 import com.nikol.lms.domain.model.FileMaterial
 import com.nikol.lms.domain.useCase.GetThemeMaterialsUseCase
 import com.nikol.lms.domain.useCase.ThemeMaterialParam
 import com.nikol.lms.ui.MaterialToUiMapper
+import com.nikol.lms_impl.di.qualifire.MaterialId
+import com.nikol.lms_impl.di.qualifire.ThemeId
 import com.nikol.lms_impl.mvi.intent.ThemeMaterialIntent
 import com.nikol.lms_impl.mvi.state.ThemeMaterialState
+import com.nikol.lms_impl.mvi.state.ThemeMaterialSuccess
+import com.nikol.lms_impl.mvi.state.currentIndex
+import com.nikol.lms_impl.mvi.state.longi
+import com.nikol.lms_impl.mvi.state.material
+import com.nikol.ui.state.Lce
+import com.nikol.ui.state.map
 import direct.direct_core.DirectEffect
+import direct.direct_core.listenLatest
 import direct.direct_core.on
 import direct.direct_core.onLatest
 import direct.direct_viewmodel.DirectViewModel
 import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 sealed interface ThemeMaterialEffect : DirectEffect {
@@ -30,21 +44,88 @@ sealed interface ThemeMaterialEffect : DirectEffect {
 typealias ThemeMaterialsStore = DirectViewModel<ThemeMaterialIntent, ThemeMaterialState, ThemeMaterialEffect>
 
 class MaterialVM @Inject constructor(
-    private val id: Int,
+    @param:MaterialId private val id: Int,
+    @param:ThemeId private val themeId: Int,
     private val materialToUiMapper: MaterialToUiMapper,
     private val getThemeMaterialsUseCase: GetThemeMaterialsUseCase,
     private val fileDAO: FileDAO,
+    private val longreadDao: LongreadDao
 ) : ThemeMaterialsStore() {
 
-    override fun createInitialState(): ThemeMaterialState = ThemeMaterialState.Loading
+    override fun createInitialState(): ThemeMaterialState = ThemeMaterialState()
 
     private val fileFlow = MutableStateFlow<List<String>>(emptyList())
 
     override fun handleIntents() = intents {
-        onLatest<ThemeMaterialIntent.Load> {
+        on<ThemeMaterialIntent.Init> {
+            val longi = longreadDao.getShortLongread(themeId)
+            val currentIndex = longi.indexOfFirst { it.id == id }
+            setState {
+                copy {
+                    ThemeMaterialState.longi set longi.toImmutableList()
+                    ThemeMaterialState.currentIndex set currentIndex
+                }
+            }
+        }
+
+        on<ThemeMaterialIntent.ClickToFile> {
+            val fileId = formatFileName(it.name, it.version)
+            val file = fileDAO.getFileById(fileId)
+
+            if (file?.status == DownloadStatus.COMPLETED && !file.localUri.isNullOrEmpty()) {
+                setEffect { ThemeMaterialEffect.OpenFile(file.localUri!!, file.mimeType) }
+            } else if (file?.status != DownloadStatus.PENDING && file?.status != DownloadStatus.DOWNLOADING) {
+                fileDAO.updateStatus(listOf(fileId), DownloadStatus.PENDING)
+                setEffect { ThemeMaterialEffect.StartWorkManager }
+            }
+        }
+
+        listen(
+            fileFlow
+                .filter { it.isNotEmpty() }
+                .flatMapLatest { fileDAO.getFileByIdFlow(it) }
+        ) {
+            serial { list ->
+                val map = list.associate { it.id to it.status }.toImmutableMap()
+                setState {
+                    copy(
+                        material = material.map { it.copy(files = map) }
+                    )
+                }
+            }
+        }
+
+        on<ThemeMaterialIntent.ClickLeft> {
+            setState {
+                if (currentIndex != 0) {
+                    copy { ThemeMaterialState.currentIndex set currentIndex - 1 }
+                } else {
+                    this
+                }
+            }
+        }
+
+        on<ThemeMaterialIntent.ClickRight> {
+            setState {
+                if (currentIndex != longi.lastIndex) {
+                    copy { ThemeMaterialState.currentIndex set currentIndex + 1 }
+                } else {
+                    this
+                }
+            }
+        }
+
+        listenLatest(
+            state
+                .filter { it.longi.isNotEmpty() }
+                .map { it.currentIndex }
+                .distinctUntilChanged()
+        ) {
+            setState { copy { ThemeMaterialState.material set Lce.Loading } }
             val fileList = mutableListOf<FileEntity>()
+            val id = state.value.longi[it].id
             val newState = getThemeMaterialsUseCase(ThemeMaterialParam(id)).fold(
-                ifLeft = { ThemeMaterialState.Error },
+                ifLeft = { error -> Lce.Failure(error) },
                 ifRight = { materials ->
                     for (it in materials) {
                         when (it) {
@@ -81,43 +162,15 @@ class MaterialVM @Inject constructor(
                     fileDAO.insertIgnore(fileList)
 
                     val mappedData = materialToUiMapper.map(materials)
-                    ThemeMaterialState.ThemeMaterialSuccess(mappedData, persistentMapOf())
+                    Lce.Content(ThemeMaterialSuccess(mappedData, persistentMapOf()))
                 }
             )
-            setState { newState }
-            fileFlow.tryEmit(fileList.map { it.id })
-        }
-
-        on<ThemeMaterialIntent.ClickToFile> {
-            val fileId = formatFileName(it.name, it.version)
-            val file = fileDAO.getFileById(fileId)
-
-            if (file?.status == DownloadStatus.COMPLETED && !file.localUri.isNullOrEmpty()) {
-                setEffect { ThemeMaterialEffect.OpenFile(file.localUri!!, file.mimeType) }
-            } else if (file?.status != DownloadStatus.PENDING && file?.status != DownloadStatus.DOWNLOADING) {
-                fileDAO.updateStatus(listOf(fileId), DownloadStatus.PENDING)
-                setEffect { ThemeMaterialEffect.StartWorkManager }
-            }
-        }
-
-        listen(
-            fileFlow
-                .filter { it.isNotEmpty() }
-                .flatMapLatest { fileDAO.getFileByIdFlow(it) }
-        ) {
-            serial { list ->
-                val map = list.associate { it.id to it.status }.toImmutableMap()
-                setState {
-                    when (this) {
-                        is ThemeMaterialState.ThemeMaterialSuccess -> copy(files = map)
-                        else -> this
-                    }
-                }
-            }
+            setState { copy { ThemeMaterialState.material set newState } }
+            fileFlow.tryEmit(fileList.map { file -> file.id })
         }
     }
 
     init {
-        setIntent(ThemeMaterialIntent.Load)
+        setIntent(ThemeMaterialIntent.Init)
     }
 }

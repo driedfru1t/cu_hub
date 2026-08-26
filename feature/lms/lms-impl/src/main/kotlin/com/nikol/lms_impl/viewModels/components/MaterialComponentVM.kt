@@ -5,6 +5,7 @@ import com.nikol.di.ext.ComponentViewModel
 import com.nikol.lms_impl.di.components.DaggerMaterialComponent
 import com.nikol.lms_impl.di.components.MaterialComponent
 
-class MaterialComponentVM(appDep: AppDep, id: Int) : ComponentViewModel<MaterialComponent>(
-    component = DaggerMaterialComponent.factory().create(id, appDep, appDep)
-)
+class MaterialComponentVM(appDep: AppDep, id: Int, themeId: Int) :
+    ComponentViewModel<MaterialComponent>(
+        component = DaggerMaterialComponent.factory().create(id, themeId, appDep, appDep)
+    )
