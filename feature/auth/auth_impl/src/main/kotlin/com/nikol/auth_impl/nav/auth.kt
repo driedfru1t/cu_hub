@@ -25,7 +25,7 @@ inline fun EntryProviderScope<NavKey>.authGraph(
 ) {
     entry<Auth> {
         val authComponent = rememberComponent { appDep -> AuthComponentViewModel(appDep) }
-        val backStack = rememberNavBackStack(YandexAuth)
+        val backStack = rememberNavBackStack(Start)
         CompositionLocalProvider(
             LocalViewModelFactory provides authComponent.viewModelFactory()
         ) {
@@ -47,10 +47,7 @@ inline fun EntryProviderScope<NavKey>.authGraph(
                         }
                         entry<YandexAuth> {
                             YandexAuthScreen {
-                                backStack.apply {
-                                    clear()
-                                    add(Start)
-                                }
+                                onAuthSuccess()
                             }
                         }
                     }

@@ -17,6 +17,9 @@ class CuHubApplication : Application(), SingletonImageLoader.Factory, Configurat
     @Inject
     lateinit var appWorkerFactory: AppWorkerFactory
 
+    @Inject
+    lateinit var imageLoader: dagger.Lazy<ImageLoader>
+
 
     override fun onCreate() {
         super.onCreate()
@@ -24,9 +27,7 @@ class CuHubApplication : Application(), SingletonImageLoader.Factory, Configurat
         component.inject(this)
     }
 
-    override fun newImageLoader(context: PlatformContext): ImageLoader {
-        return component.imageLoader()
-    }
+    override fun newImageLoader(context: PlatformContext) = imageLoader.get()
 
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()

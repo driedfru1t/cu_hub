@@ -18,6 +18,7 @@ dependencies {
 
     implementation(projects.feature.auth.authApi)
     implementation(projects.core.storage)
+    implementation(projects.core.designsystem)
     implementation(projects.core.security)
     implementation(projects.core.prefs)
 
