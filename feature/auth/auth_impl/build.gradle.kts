@@ -18,6 +18,7 @@ dependencies {
 
     implementation(projects.feature.auth.authApi)
     implementation(projects.core.storage)
+    implementation(projects.core.designsystem)
     implementation(projects.core.security)
     implementation(projects.core.prefs)
 
@@ -29,6 +30,8 @@ dependencies {
 
     implementation(libs.yandex.auth.sdk)
     implementation(libs.androidx.appcompat)
+
+    implementation(libs.androidx.material.icons.extended)
 
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mokk)
