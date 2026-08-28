@@ -24,9 +24,11 @@ class AuthViewModel @Inject constructor(
     override fun handleIntents() = intents {
         on<AuthIntent.LogIn> { intent ->
             intent.yandexToken?.let {
+                Log.d("Yandex", it.token)
                 tokenManager.saveYandexToken(it)
             }
             intent.cuToken?.let {
+                Log.d("CU", it.token)
                 tokenManager.saveCuToken(it)
             }
             if (intent.yandexToken != null || intent.cuToken != null) {

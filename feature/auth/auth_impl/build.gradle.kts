@@ -31,6 +31,8 @@ dependencies {
     implementation(libs.yandex.auth.sdk)
     implementation(libs.androidx.appcompat)
 
+    implementation(libs.androidx.material.icons.extended)
+
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mokk)
 
