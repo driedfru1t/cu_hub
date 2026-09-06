@@ -6,3 +6,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data object Schedule : NavKey
+
+@Serializable
+data class EventDetail(
+    val href: String,
+    val start: Long
+) : NavKey

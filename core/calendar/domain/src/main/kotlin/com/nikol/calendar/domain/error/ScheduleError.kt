@@ -7,6 +7,7 @@ sealed interface ScheduleError {
     data object Parsing : ScheduleError
 
     data object Storage : ScheduleError
+    data object NotFound : ScheduleError
 
     data object Unauthorized : ScheduleError
 }

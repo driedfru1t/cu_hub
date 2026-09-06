@@ -7,7 +7,7 @@ import dagger.Component
 
 @Component(
     dependencies = [LocalScheduleDep::class, NetworkYandexDep::class],
-    modules = [VMModule::class, ScheduleUCModule::class, ScheduleDataModule::class]
+    modules = [ScheduleVMModule::class, ScheduleUCModule::class, ScheduleDataModule::class]
 )
 @ScheduleScope
 interface ScheduleComponent : FeatureComponent {

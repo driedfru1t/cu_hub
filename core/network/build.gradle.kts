@@ -17,6 +17,7 @@ dependencies {
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.ktor.client.auth)
     implementation(libs.ktor.client.resources)
+    implementation(libs.ktor.client.encoding)
 
     implementation(libs.coil.network.ktor3)
 

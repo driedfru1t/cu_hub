@@ -65,7 +65,7 @@ fun EntryProviderScope<NavKey>.mainGraph(
                 navigateTo = { navigator.navigate(it) },
                 navigateToRoot = navigateToRoot
             )
-            schedule()
+            schedule(onBack = { navigator.onBack() }, onNavigate = { navigator.navigate(it) })
             entry<Settings> {
 
             }
@@ -106,8 +106,7 @@ fun EntryProviderScope<NavKey>.mainGraph(
                             )
                             .clickable {
                                 navigator.navigate(route)
-                            }
-                    ) {
+                            }) {
                         Icon(
                             painter = painterResource(navItem.icon),
                             contentDescription = null,

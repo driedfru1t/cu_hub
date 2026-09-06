@@ -37,7 +37,7 @@ import kotlin.time.toJavaInstant
 import kotlin.time.toKotlinInstant
 
 
-class AndroidTimeZoneRegistry : TimeZoneRegistry {
+object AndroidTimeZoneRegistry : TimeZoneRegistry {
 
     private val timeZoneMap = ConcurrentHashMap<String, TimeZone>()
     private val zoneIdMap = ConcurrentHashMap<String, ZoneId>()
@@ -71,10 +71,13 @@ class AndroidTimeZoneRegistry : TimeZoneRegistry {
 
     override fun getZoneId(tzId: String?): ZoneId? {
         if (tzId == null) return null
-        return zoneIdMap[tzId]
-            ?: runCatching { ZoneId.of(tzId, TimeZoneRegistry.ZONE_ALIASES) }.getOrNull()
-            ?: runCatching { ZoneId.of(tzId) }.getOrNull()
-            ?: ZoneId.systemDefault()
+
+        // computeIfAbsent: вычисляет один раз, КЭШИРУЕТ и больше не вызывает runCatching!
+        return zoneIdMap.computeIfAbsent(tzId) { id ->
+            runCatching { ZoneId.of(id, TimeZoneRegistry.ZONE_ALIASES) }.getOrNull()
+                ?: runCatching { ZoneId.of(id) }.getOrNull()
+                ?: ZoneId.systemDefault()
+        }
     }
 
     override fun getTzId(zoneId: String?): String? {
@@ -83,11 +86,12 @@ class AndroidTimeZoneRegistry : TimeZoneRegistry {
     }
 }
 
+private val calendarBuilderThreadLocal = ThreadLocal.withInitial {
+    CalendarBuilder(AndroidTimeZoneRegistry)
+}
 
-fun createAndroidCalendarBuilder(): CalendarBuilder {
-    return CalendarBuilder(
-        AndroidTimeZoneRegistry()
-    )
+fun getAndroidCalendarBuilder(): CalendarBuilder {
+    return calendarBuilderThreadLocal.get()
 }
 
 class RecurrenceParserICal4J @Inject constructor() : RecurrenceParser {
@@ -105,11 +109,11 @@ class RecurrenceParserICal4J @Inject constructor() : RecurrenceParser {
         if (entity.recurrenceRule != null) {
             val duration = Duration.between(entity.firstStart, entity.firstEnd)
             val seed = entity.firstStart.atZone(zoneId)
-            val rangeStart = from.atZone(zoneId)
+            val searchStart = from.minus(duration).atZone(zoneId)
             val rangeEnd = to.atZone(zoneId)
 
             val recur = Recur<ZonedDateTime>(entity.recurrenceRule)
-            val occurrenceStarts: List<ZonedDateTime> = recur.getDates(seed, rangeStart, rangeEnd)
+            val occurrenceStarts: List<ZonedDateTime> = recur.getDates(seed, searchStart, rangeEnd)
 
             for (startZdt in occurrenceStarts) {
                 val startInstant = startZdt.toInstant()
@@ -120,7 +124,7 @@ class RecurrenceParserICal4J @Inject constructor() : RecurrenceParser {
 
                 resultEvents.add(
                     CalendarEvent(
-                        id = entity.uid,
+                        id = entity.href,
                         title = entity.title ?: "",
                         description = entity.description,
                         start = startInstant,
@@ -132,7 +136,7 @@ class RecurrenceParserICal4J @Inject constructor() : RecurrenceParser {
             if (entity.exdates.isEmpty() && entity.firstStart < to && entity.firstEnd > from) {
                 resultEvents.add(
                     CalendarEvent(
-                        id = entity.uid,
+                        id = entity.href,
                         title = entity.title ?: "",
                         description = entity.description,
                         start = entity.firstStart,
@@ -146,7 +150,7 @@ class RecurrenceParserICal4J @Inject constructor() : RecurrenceParser {
             if (overrideEvent.start.toJavaInstant() < to && overrideEvent.end.toJavaInstant() > from) {
                 resultEvents.add(
                     CalendarEvent(
-                        id = entity.uid,
+                        id = entity.href,
                         title = overrideEvent.title ?: entity.title ?: "",
                         description = overrideEvent.description ?: entity.description,
                         start = overrideEvent.start.toJavaInstant(),
@@ -164,90 +168,84 @@ class RecurrenceParserICal4J @Inject constructor() : RecurrenceParser {
         eTag: String,
         rawIcs: String
     ): CalendarEventEntity {
-        val calendar = createAndroidCalendarBuilder().build(rawIcs.reader())
+        val calendar = getAndroidCalendarBuilder().build(rawIcs.reader())
         val events = calendar.getComponents<VEvent>(Component.VEVENT)
 
-        val masterEvent = events.firstOrNull { e ->
-            e.getProperty<RRule<*>>(Property.RRULE).isPresent ||
-                    e.getProperty<RecurrenceId<*>>(Property.RECURRENCE_ID).isEmpty
-        } ?: events.first()
+        var masterEvent: VEvent? = null
+        var minStart: Instant? = null
+        var maxEnd: Instant? = null
 
-        val uid = masterEvent.uid.orElseThrow().value
-        val title = masterEvent.getProperty<Summary>(Property.SUMMARY).getOrNull()?.value
-        val description =
-            masterEvent.getProperty<Description>(Property.DESCRIPTION).getOrNull()?.value
-        val location = masterEvent.getProperty<Location>(Property.LOCATION).getOrNull()?.value
+        val allExdates = mutableSetOf<Instant>()
+        val overrides = mutableListOf<OverrideEventDto>()
 
-        val allStarts = events.mapNotNull { e ->
-            e.getProperty<DtStart<*>>(Property.DTSTART).getOrNull()?.toInstant()
+        for (event in events) {
+            val rrule = event.getProperty<RRule<*>>(Property.RRULE)
+            val recurrenceId = event.getProperty<RecurrenceId<*>>(Property.RECURRENCE_ID)
+
+            if (masterEvent == null && (rrule.isPresent || recurrenceId.isEmpty)) {
+                masterEvent = event
+            }
+            val startInstant = event.getProperty<DtStart<*>>(Property.DTSTART).getOrNull()?.toInstant()
+            if (startInstant != null) {
+                if (minStart == null || startInstant < minStart) minStart = startInstant
+            }
+
+            val endInstant = event.getProperty<DtEnd<*>>(Property.DTEND).getOrNull()?.toInstant()
+            if (endInstant != null) {
+                if (maxEnd == null || endInstant > maxEnd) maxEnd = endInstant
+            }
+            if (recurrenceId.isPresent) {
+                val recIdProp = recurrenceId.get()
+                allExdates.add(recIdProp.toInstant())
+
+                if (startInstant != null && endInstant != null) {
+                    overrides.add(
+                        OverrideEventDto(
+                            start = startInstant.toKotlinInstant(),
+                            end = endInstant.toKotlinInstant(),
+                            title = event.getProperty<Summary>(Property.SUMMARY).getOrNull()?.value,
+                            description = event.getProperty<Description>(Property.DESCRIPTION).getOrNull()?.value
+                        )
+                    )
+                }
+            }
         }
-        val allEnds = events.mapNotNull { e ->
-            e.getProperty<DtEnd<*>>(Property.DTEND).getOrNull()?.toInstant()
-        }
 
-        val dtStart = allStarts.minOrNull() ?: masterEvent.getProperty<DtStart<*>>(Property.DTSTART)
-            .orElseThrow().toInstant()
-        val dtEnd =
-            allEnds.maxOrNull() ?: masterEvent.getProperty<DtEnd<*>>(Property.DTEND).orElseThrow()
-                .toInstant()
+        val finalMaster = masterEvent ?: events.first()
+        val uid = finalMaster.uid.orElseThrow().value
+        val dtStartProp = finalMaster.getProperty<DtStart<*>>(Property.DTSTART).orElseThrow()
+        val dtStart = finalMaster.getProperty<DtStart<*>>(Property.DTSTART).orElseThrow().toInstant()
+        val dtEnd = finalMaster.getProperty<DtEnd<*>>(Property.DTEND).orElseThrow().toInstant()
 
-        val dtStartProp = masterEvent.getProperty<DtStart<*>>(Property.DTSTART).orElseThrow()
         val timeZoneId = dtStartProp.getParameter<TzId>("TZID").getOrNull()?.value
             ?: calendar.getComponents<net.fortuna.ical4j.model.component.VTimeZone>(Component.VTIMEZONE)
                 .firstOrNull()?.timeZoneId?.value
 
-        val rruleProp = masterEvent.getProperty<RRule<*>>(Property.RRULE).getOrNull()
+        val explicitExdates = finalMaster.getProperties<ExDate<*>>(Property.EXDATE)
+        for (exDateProp in explicitExdates) {
+            val propTzid = exDateProp.getParameter<TzId>("TZID").getOrNull()?.value ?: timeZoneId
+            for (temporal in exDateProp.dates) {
+                allExdates.add(temporal.toInstant(propTzid))
+            }
+        }
+
+        val rruleProp = finalMaster.getProperty<RRule<*>>(Property.RRULE).getOrNull()
         val recurrenceRule = rruleProp?.value
         val rawUntil = rruleProp?.recur?.until?.toInstant()
         val recurrenceUntil = if (rawUntil != null && dtEnd > rawUntil) dtEnd else rawUntil
 
-        val explicitExdates = masterEvent.getProperties<ExDate<*>>(Property.EXDATE)
-            .flatMap { exDateProp ->
-                val propTzid =
-                    exDateProp.getParameter<TzId>("TZID").getOrNull()?.value ?: timeZoneId
-                exDateProp.dates.map { temporal -> temporal.toInstant(propTzid) }
-            }
-
-        val overrideRecurrenceIds = events
-            .mapNotNull { e -> e.getProperty<RecurrenceId<*>>(Property.RECURRENCE_ID).getOrNull() }
-            .map { recurrenceIdProp -> recurrenceIdProp.toInstant() }
-
-        val allExdates = (explicitExdates + overrideRecurrenceIds).distinct()
-
-        val overrides = events
-            .filter { e -> e.getProperty<RecurrenceId<*>>(Property.RECURRENCE_ID).isPresent }
-            .mapNotNull { overrideEvent ->
-                val start =
-                    overrideEvent.getProperty<DtStart<*>>(Property.DTSTART).getOrNull()?.toInstant()
-                        ?: return@mapNotNull null
-                val end =
-                    overrideEvent.getProperty<DtEnd<*>>(Property.DTEND).getOrNull()?.toInstant()
-                        ?: return@mapNotNull null
-                val overrideTitle =
-                    overrideEvent.getProperty<Summary>(Property.SUMMARY).getOrNull()?.value
-                val overrideDesc =
-                    overrideEvent.getProperty<Description>(Property.DESCRIPTION).getOrNull()?.value
-
-                OverrideEventDto(
-                    start = start.toKotlinInstant(),
-                    end = end.toKotlinInstant(),
-                    title = overrideTitle,
-                    description = overrideDesc
-                )
-            }
-
         return CalendarEventEntity(
             href = href,
             uid = uid,
-            title = title,
-            description = description,
-            location = location,
+            title = finalMaster.getProperty<Summary>(Property.SUMMARY).getOrNull()?.value,
+            description = finalMaster.getProperty<Description>(Property.DESCRIPTION).getOrNull()?.value,
+            location = finalMaster.getProperty<Location>(Property.LOCATION).getOrNull()?.value,
             timeZoneId = timeZoneId,
             firstStart = dtStart,
             firstEnd = dtEnd,
             recurrenceRule = recurrenceRule,
             recurrenceUntil = recurrenceUntil,
-            exdates = allExdates,
+            exdates = allExdates.toList(),
             overrides = overrides,
             rawIcs = rawIcs,
             eTag = eTag

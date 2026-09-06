@@ -10,7 +10,7 @@ enum class EventType(val displayName: String) {
     OFFICE_HOURS("Office Hours"),
     INTERNAL_EVENT("Внутреннее мероприятие"),
     OTHER("Другое"),
-    UNKNOWN("Событие"); // Для произвольных названий без формата ("CUPutt", "Посвящение в студенты")
+    UNKNOWN("Событие");
 
     companion object {
         fun fromString(raw: String?): EventType {
@@ -27,6 +27,23 @@ enum class EventType(val displayName: String) {
                 clean.contains("внутреннее мероприятие") -> INTERNAL_EVENT
                 clean.contains("другое") -> OTHER
                 else -> UNKNOWN
+            }
+        }
+
+        fun looksLikeEvent(raw: String?): Boolean {
+            if (raw == null) return false
+            val clean = raw.trim().lowercase()
+            return when {
+                clean.contains("лекци") ||
+                clean.contains("семинар") ||
+                clean.contains("контрольн") || clean.contains("контест") ||
+                clean.contains("коллоквиум") ||
+                clean.contains("экзамен") ||
+                clean.contains("зачет") || clean.contains("зачёт") ||
+                clean.contains("office hours") || clean.contains("oh ") ||
+                clean.contains("внутреннее мероприятие") ||
+                clean.contains("другое") -> true
+                else -> false
             }
         }
     }

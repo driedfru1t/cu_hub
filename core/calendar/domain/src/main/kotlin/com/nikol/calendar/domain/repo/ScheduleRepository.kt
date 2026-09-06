@@ -13,9 +13,11 @@ interface ScheduleRepository {
         end: Instant
     ): Flow<List<CalendarEvent>>
 
+    context(raise: Raise<ScheduleError>)
     suspend fun getEvent(
-        href: String
-    ): CalendarEvent?
+        href: String,
+        start: Instant
+    ): CalendarEvent
 
     context(raise: Raise<ScheduleError>)
     suspend fun refresh()

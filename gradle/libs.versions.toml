@@ -72,6 +72,7 @@ ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging" }
 ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json" }
 ktor-client-auth = { group = "io.ktor", name = "ktor-client-auth" }
 ktor-client-resources = { group = "io.ktor", name = "ktor-client-resources" }
+ktor-client-encoding = { group = "io.ktor", name = "ktor-client-encoding" }
 
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlin" }

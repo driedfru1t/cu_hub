@@ -1,5 +1,6 @@
 package com.nikol.lms.data.mapper
 
+import android.util.Log
 import com.nikol.lms.data.remote.model.material.ExerciseQuestionsSettingsDto
 import com.nikol.lms.data.remote.model.material.LongreadAudioMaterialItemDto
 import com.nikol.lms.data.remote.model.material.LongreadExerciseCodingMaterialItemDto
@@ -88,7 +89,7 @@ fun LongreadMaterialActivityDto.toDomain() = MaterialActivity(
 
 fun LongreadMaterialEstimationDto.toDomain() = MaterialEstimation(
     startDate = Instant.parse(startDate),
-    timer = timer?.let { Duration.parse(it) },
+    timer = timer?.let { Log.d("DEBUG", it);Duration.parse(it) },
     maxScore = maxScore,
     deadline = deadline?.let { Instant.parse(it) },
     activity = activity?.toDomain()

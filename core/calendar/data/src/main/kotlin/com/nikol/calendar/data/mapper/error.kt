@@ -14,4 +14,6 @@ fun CalDavError.toScheduleError(): ScheduleError =
 
         CalDavError.XmlParsingFailed ->
             ScheduleError.Parsing
+
+        is CalDavError.SyncTokenExpired -> ScheduleError.Storage
     }
