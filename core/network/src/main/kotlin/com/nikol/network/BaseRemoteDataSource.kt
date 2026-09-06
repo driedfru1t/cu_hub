@@ -37,7 +37,6 @@ abstract class BaseRemoteDataSource(protected val json: Json) {
     }
 
 
-
     // эта функйия вернет CancellationException
     protected suspend inline fun <reified T> safeApiCall(
         crossinline apiCall: suspend () -> HttpResponse
@@ -88,7 +87,10 @@ abstract class BaseRemoteDataSource(protected val json: Json) {
     }
 
 
-    protected fun parseNetworkError(code: Int, errorBody: String): NetworkError {
+    protected fun parseNetworkError(
+        code: Int,
+        errorBody: String = ""
+    ): NetworkError {
         return when (code) {
             400 -> NetworkError.BadRequest
             401 -> NetworkError.Unauthorized

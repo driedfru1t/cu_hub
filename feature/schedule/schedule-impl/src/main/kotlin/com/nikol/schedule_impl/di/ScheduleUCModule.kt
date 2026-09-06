@@ -2,6 +2,7 @@ package com.nikol.schedule_impl.di
 
 import com.nikol.calendar.domain.repo.ScheduleRepository
 import com.nikol.calendar.domain.useCase.GetEventsUseCase
+import com.nikol.calendar.domain.useCase.GetSingleEvent
 import com.nikol.calendar.domain.useCase.RefreshUseCase
 import com.nikol.common.CuHubDispatcher
 import com.nikol.common.Dispatcher
@@ -17,6 +18,14 @@ class ScheduleUCModule {
         scheduleRepository: ScheduleRepository
     ): GetEventsUseCase {
         return GetEventsUseCase(scheduleRepository, coroutineDispatcher)
+    }
+
+    @Provides
+    fun provideGetSingleEventUseCase(
+        @Dispatcher(CuHubDispatcher.IO) coroutineDispatcher: CoroutineDispatcher,
+        scheduleRepository: ScheduleRepository
+    ): GetSingleEvent {
+        return GetSingleEvent(scheduleRepository, coroutineDispatcher)
     }
 
     @Provides

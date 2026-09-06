@@ -1,66 +1,50 @@
 package com.nikol.calendar.domain
 
 import com.nikol.calendar.domain.model.CalendarEvent
-import com.nikol.calendar.domain.model.EventBadgeColor
+import com.nikol.calendar.domain.model.Campus
+import com.nikol.calendar.domain.model.CampusBuilding
+import com.nikol.calendar.domain.model.EventLocation
 import com.nikol.calendar.domain.model.EventType
-import com.nikol.calendar.domain.model.RoomInfo
 import com.nikol.calendar.domain.model.ScheduleEvent
-import com.nikol.calendar.domain.model.Tower
 
 object SummaryParser {
 
     private val ROOM_REGEX = Regex(
-        """\b([BF]\d{3,4}(?:\s*[\+-]\s*[BF]?\d{3,4})*|[BF]\d{3,4}-[BF]?\d{3,4})\b|Агат|Сетунь|Таганка|Таганке""",
+        """\b[BFNESW]\d{3,4}(?:-\d+)?\b|Агат|Сетунь|Таганка|Таганке""",
         RegexOption.IGNORE_CASE
     )
-
-    private val NAMED_ROOMS = setOf("Агат", "Сетунь")
-    private val FLOOR_REGEX = Regex("""[BF](\d{1,2})\d{2}""", RegexOption.IGNORE_CASE)
+    private val FLOOR_REGEX = Regex("""[BFNESW](\d{1,2})\d{2}""", RegexOption.IGNORE_CASE)
 
     fun parse(
         event: CalendarEvent
     ): ScheduleEvent {
-        val badges = mutableListOf<EventBadgeColor>()
         val rawSummary = event.title.trim()
 
-        var title = rawSummary
-        var rawEventType: String? = null
-        var rawRoom: String? = null
-        var teacherName: String? = null
+        val parts = rawSummary
+            .split(",")
+            .map(String::trim)
+            .filter(String::isNotEmpty)
 
-        val teacherMatch = Regex("""^(.*?),\s*([А-Яа-яA-Za-z\s]+)\s*\(([BF]\d{3,4}.*?)\)$""").find(rawSummary)
-        if (teacherMatch != null) {
-            title = teacherMatch.groupValues[1].trim()
-            teacherName = teacherMatch.groupValues[2].trim()
-            rawRoom = teacherMatch.groupValues[3].trim()
-        } else {
-            val parts = rawSummary.split(",").map { it.trim() }.filter { it.isNotEmpty() }
-            when (parts.size) {
-                3 -> {
-                    title = parts[0]
-                    rawEventType = parts[1]
-                    rawRoom = parts[2]
-                }
-                2 -> {
-                    title = parts[0]
-                    if (looksLikeRoom(parts[1])) {
-                        rawRoom = parts[1]
-                    } else {
-                        rawEventType = parts[1]
-                    }
-                }
-                1 -> {
-                    title = parts[0]
-                }
-                else -> {
-                    title = parts[0]
-                    rawEventType = parts[1]
-                    rawRoom = parts.subList(2, parts.size).joinToString(", ")
-                }
-            }
-        }
+        var endIndex = parts.size
+        print(parts)
+        var rawRoom = parts.lastOrNull()?.takeIf(::looksLikeLocation)
 
-        val roomInParenMatch = Regex("""\((B\d{3,4}.*?|F\d{3,4}.*?)\)""").find(title)
+        rawRoom?.let { --endIndex }
+
+        val rawEventType = parts.getOrNull(endIndex - 1)
+            ?.takeIf(EventType::looksLikeEvent)
+
+        rawEventType?.let { --endIndex }
+
+        var title = parts
+            .take(endIndex)
+            .joinToString(", ")
+
+
+        val roomInParenMatch = Regex(
+            """\(([BFNESW]\d{3,4}(?:\s*[-+]\s*[BFNESW]?\d{3,4})*|Агат|Сетунь)\)""",
+            RegexOption.IGNORE_CASE
+        ).find(title)
         if (roomInParenMatch != null) {
             if (rawRoom == null) {
                 rawRoom = roomInParenMatch.groupValues[1]
@@ -73,9 +57,9 @@ object SummaryParser {
         }
 
         val isRetakeWeek = rawSummary.contains("Неделя дорешек", ignoreCase = true)
-        val isOfficeHours = rawSummary.contains("Office hours", ignoreCase = true) || rawSummary.contains("OH ", ignoreCase = true)
 
-        val roomInfo = rawRoom?.let { parseRoomInfo(it) }
+
+        val roomInfo = rawRoom?.let { parseLocation(it) } ?: EventLocation.Unknown
         val eventType = EventType.fromString(rawEventType)
 
         return ScheduleEvent(
@@ -85,45 +69,106 @@ object SummaryParser {
             title = title,
             rawTitle = event.title,
             eventType = eventType,
-            customTypeLabel = if (eventType == EventType.UNKNOWN || eventType == EventType.OTHER) rawEventType else null,
-            badges = badges,
-            roomInfo = roomInfo,
-            teacherName = teacherName,
+            customTypeLabel = if (eventType == EventType.UNKNOWN) rawEventType else null,
+            eventLocation = roomInfo,
             description = event.description,
             isRetakeWeek = isRetakeWeek,
-            isOfficeHours = isOfficeHours
         )
+    }
+
+    private fun looksLikeLocation(text: String): Boolean {
+        val upper = text.trim().uppercase()
+
+        return looksLikeRoom(text) ||
+                upper.contains("ОНЛАЙН") ||
+                upper.contains("ONLINE") ||
+                upper.contains("HYBRID") ||
+                upper.contains("ТАГАНК") ||
+                upper.contains("АГАТ") ||
+                upper.contains("СЕТУНЬ")
     }
 
     private fun looksLikeRoom(text: String): Boolean {
         return ROOM_REGEX.containsMatchIn(text) || text.contains("+")
     }
 
-    private fun parseRoomInfo(roomRaw: String): RoomInfo {
-        val tower = Tower.fromRoomString(roomRaw)
-        val isNamed = NAMED_ROOMS.any { roomRaw.contains(it, ignoreCase = true) }
+    private val ROOM_CODE_REGEX =
+        Regex("""^[BFNESW]\d{3,4}(?:-\d+)?$""", RegexOption.IGNORE_CASE)
 
-        val rooms = when {
-            roomRaw.contains("+") -> roomRaw.split("+").map { it.trim() }
-            roomRaw.contains("-") && !roomRaw.contains("Таганке", ignoreCase = true) -> {
-                roomRaw.split("-").map { it.trim() }
+    private fun parseLocation(roomRaw: String): EventLocation {
+        val raw = roomRaw.trim()
+        val upper = raw.uppercase()
+
+        if (
+            upper.contains("ОНЛАЙН") ||
+            upper.contains("ONLINE") ||
+            upper.contains("HYBRID")
+        ) {
+            return EventLocation.Online
+        }
+
+        if (
+            upper.contains("ТАГАНК") ||
+            upper.contains("ТАГАНКЕ")
+        ) {
+            return EventLocation.External(raw)
+        }
+
+        if (upper.contains("АГАТ")) {
+            return EventLocation.University(
+                campus = Campus.DUKAT,
+                building = CampusBuilding.DUKAT_FRONTEND,
+                floor = 4,
+                rooms = listOf("Агат"),
+            )
+        }
+
+        if (upper.contains("СЕТУНЬ")) {
+            return EventLocation.University(
+                campus = Campus.DUKAT,
+                building = CampusBuilding.DUKAT_FRONTEND,
+                floor = 4,
+                rooms = listOf("Сетунь"),
+            )
+        }
+
+        val rooms = raw.splitRooms()
+
+        val firstRoom = rooms.firstOrNull() ?: return EventLocation.Unknown
+
+        val building = when {
+            firstRoom.matches(ROOM_CODE_REGEX) -> when (firstRoom.first().uppercaseChar()) {
+                'B' -> CampusBuilding.DUKAT_BACKEND
+                'F' -> CampusBuilding.DUKAT_FRONTEND
+                'W' -> CampusBuilding.CT_WEST
+                'N' -> CampusBuilding.CT_NORTH
+                'E' -> CampusBuilding.CT_EAST
+                'S' -> CampusBuilding.CT_SOUTH
+                else -> null
             }
-            else -> listOf(roomRaw.trim())
+
+            else -> null
         }
 
-        val floor = if (isNamed) {
-            4
-        } else {
-            extractFloor(rooms.firstOrNull() ?: roomRaw)
+        if (building == null) {
+            return EventLocation.Unknown
         }
 
-        return RoomInfo(
-            raw = roomRaw,
-            rooms = rooms,
-            tower = tower,
-            floor = floor,
-            isNamedRoom = isNamed
+        return EventLocation.University(
+            campus = building.campus,
+            building = building,
+            floor = extractFloor(firstRoom),
+            rooms = rooms
         )
+    }
+
+    private fun String.splitRooms(): List<String> {
+        return this
+            .removeSuffix("(ЦТ)")
+            .removeSuffix("(Дукат)")
+            .split("+")
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
     }
 
     private fun extractFloor(roomCode: String): Int? {

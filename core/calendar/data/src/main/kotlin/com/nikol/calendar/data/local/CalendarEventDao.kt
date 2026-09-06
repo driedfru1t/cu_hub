@@ -2,7 +2,9 @@ package com.nikol.calendar.data.local
 
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Upsert
+import com.nikol.calendar.data.DatabaseChanges
 import kotlinx.coroutines.flow.Flow
 import java.time.Instant
 
@@ -70,6 +72,12 @@ interface CalendarEventDao {
         events: List<CalendarEventEntity>
     )
 
+    @Transaction
+    suspend fun sync(databaseChanges: DatabaseChanges) {
+        upsert(databaseChanges.upsert)
+        deleteByHrefs(databaseChanges.delete)
+    }
+
 
     @Query(
         """
@@ -99,4 +107,6 @@ interface CalendarEventDao {
         """
     )
     suspend fun clear()
+
+
 }

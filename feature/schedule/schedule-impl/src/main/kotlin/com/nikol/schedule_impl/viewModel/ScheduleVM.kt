@@ -1,17 +1,17 @@
 package com.nikol.schedule_impl.viewModel
 
-import android.util.Log
 import androidx.lifecycle.viewModelScope
 import arrow.optics.copy
 import arrow.optics.optics
 import com.nikol.calendar.domain.error.ScheduleError
 import com.nikol.calendar.domain.model.ScheduleEvent
-import com.nikol.calendar.domain.SummaryParser
 import com.nikol.calendar.domain.useCase.GetEventsUseCase
 import com.nikol.calendar.domain.useCase.RefreshUseCase
 import com.nikol.calendar.domain.useCase.ScheduleParam
 import com.nikol.domain.NoParam
 import com.nikol.ui.state.Lce
+import com.nikol.viewmodel.Router
+import com.nikol.viewmodel.RouterViewModel
 import direct.direct_core.DirectEffect
 import direct.direct_core.DirectIntent
 import direct.direct_core.DirectState
@@ -28,11 +28,14 @@ import java.time.LocalDate
 import java.time.ZoneId
 import javax.inject.Inject
 
+
 @optics
 data class ScheduleState(
     val schedule: Lce<ScheduleError, List<ScheduleEvent>> = Lce.Loading,
     val from: Instant,
-    val to: Instant
+    val to: Instant,
+    val isLoading: Boolean = false,
+    val offset: Int = 0
 ) : DirectState {
     companion object
 }
@@ -40,12 +43,18 @@ data class ScheduleState(
 sealed interface ScheduleIntent : DirectIntent {
     data object Refresh : ScheduleIntent
     data class ChangeDateRange(val from: Instant, val to: Instant) : ScheduleIntent
+
+    data class Detail(val href: String, val start: Long) : ScheduleIntent
+}
+
+fun interface ScheduleRouter : Router {
+    fun onDetail(href: String, start: Long)
 }
 
 class ScheduleVM @Inject constructor(
     private val getEventsUseCase: GetEventsUseCase,
     private val refreshUseCase: RefreshUseCase
-) : DirectViewModel<ScheduleIntent, ScheduleState, DirectEffect>() {
+) : RouterViewModel<ScheduleIntent, ScheduleState, DirectEffect, ScheduleRouter>() {
 
     init {
         state
@@ -98,8 +107,11 @@ class ScheduleVM @Inject constructor(
         }
 
         onSingle<ScheduleIntent.Refresh> {
-            setState { ScheduleState.schedule.set(this, Lce.Loading) }
+            setState { copy { ScheduleState.isLoading set true } }
             refreshUseCase(NoParam)
+            setState { copy { ScheduleState.isLoading set false } }
         }
+
+        onNavigate<ScheduleIntent.Detail> { onDetail(it.href, it.start) }
     }
 }

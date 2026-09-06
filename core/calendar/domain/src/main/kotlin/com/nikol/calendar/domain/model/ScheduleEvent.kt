@@ -10,10 +10,7 @@ data class ScheduleEvent(
     val rawTitle: String,
     val eventType: EventType,
     val customTypeLabel: String?,
-    val badges: List<EventBadgeColor>,
-    val roomInfo: RoomInfo?,
-    val teacherName: String? = null,
+    val eventLocation: EventLocation,
     val description: String? = null,
     val isRetakeWeek: Boolean = false,
-    val isOfficeHours: Boolean = false
 )
